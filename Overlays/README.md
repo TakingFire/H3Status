@@ -14,7 +14,7 @@ Featuring a score counter, hold progress, and icons for every ammo type in the g
 **Direct URL: [tnh.overlays.bacur.xyz](https://tnh.overlays.bacur.xyz)**\
 Download: [DownGit](https://downgit.github.io/#/home?url=https://github.com/TakingFire/H3Status/tree/main/Overlays/TNHScoreLog)
 
-### [TNH Score Breakdown](TNHScoreBreakdown/) by [Quilavad](https://github.com/quilavad)
+### [TNH Score Breakdown](https://github.com/quilavad/TNHScoreBreakdown) by [Quilavad](https://github.com/quilavad)
 
 An extension to [TNHScoreLog](#tnh-score-log) that records and displays a detailed score breakdown upon run completion.\
 Also includes audio cues that play when score bonuses are lost.
