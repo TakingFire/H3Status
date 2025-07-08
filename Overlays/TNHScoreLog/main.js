@@ -1,4 +1,4 @@
-const { animate, createAnimatable, utils, eases, stagger } = anime;
+const { animate, createAnimatable, utils, eases } = anime;
 
 function connect() {
   const ws = new WebSocket("ws://localhost:" + globalConfig.webSocketPort);
@@ -132,7 +132,7 @@ function handlePhaseEvent(event) {
       break;
     }
     case "Complete": {
-      for (let i = 0; i <= currentPhaseIndex + 1; i++) {
+      for (let i = 0; i <= currentPhaseIndex; i++) {
         levelBar.setColor(i, "#0f4");
       }
       break;
@@ -157,7 +157,7 @@ function handleHoldPhaseEvent(event) {
   } else if (event.phase == "Hacking") {
     phaseBar.setColor(currentHoldPhaseIndex, "#f80");
   } else {
-    phaseBar.setColor(currentHoldPhaseIndex, "#0ff");
+    phaseBar.setColor(currentHoldPhaseIndex - 1, "#0ff");
   }
 
   if (currentHoldPhaseIndex > 0) {
@@ -322,7 +322,6 @@ class Log {
     utils.set(":root", { "--log-length": length });
     this.elements = [];
     this.queue = [];
-    // this.total = 0;
 
     if (!globalConfig.showEventLog) return;
 
@@ -341,15 +340,11 @@ class Log {
 
   addItem(text, color, duration) {
     this.queue.push({ text: text, color: color, duration: duration });
-    // this.queue.sort((a, b) =>
-    //   b.text.localeCompare(a.text, undefined, { numeric: true }),
-    // );
   }
 
   animateItem({ text, color, duration }) {
     const el = document.createElement("span");
     el.textContent = text;
-    // el.dataset.id = this.total++;
     this.element.appendChild(el);
     this.elements.push(el);
 
@@ -366,16 +361,6 @@ class Log {
       delay: (duration || globalConfig.eventLogLifeTime) * 1000,
       duration: 1000,
       onComplete: () => {
-        // this.elements.forEach((after) => {
-        //   if (after.dataset.id < el.dataset.id) {
-        //     animate(after, {
-        //       y: "+=" + after.clientHeight,
-        //       duration: 250,
-        //       ease: eases.outBack(1.5),
-        //     });
-        //   }
-        // });
-
         this.elements.splice(this.elements.indexOf(el), 1);
         el.remove();
       },
