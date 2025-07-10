@@ -159,7 +159,7 @@ function handlePhaseEvent(event) {
       levelBar.setColor(currentPhaseIndex - 1, "#0f4");
       break;
     }
-    case "Complete": {
+    case "Completed": {
       for (let i = 0; i <= currentPhaseIndex; i++) {
         levelBar.setColor(i, "#0f4");
       }
