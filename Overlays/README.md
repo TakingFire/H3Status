@@ -17,7 +17,8 @@ Download: [DownGit](https://downgit.github.io/#/home?url=https://github.com/Taki
 ### [TNH Score Breakdown](https://github.com/quilavad/TNHScoreBreakdown) by [Quilavad](https://github.com/quilavad)
 
 An extension to [TNHScoreLog](#tnh-score-log) that records and displays a detailed score breakdown upon run completion.\
-Also includes audio cues that play when score bonuses are lost.
+Also includes audio cues that play when score bonuses are lost.\
+**To Install:** follow the instructions on the overlay [homepage](https://github.com/quilavad/TNHScoreBreakdown).
 
 Download: [DownGit](https://downgit.github.io/#/home?url=https://github.com/quilavad/TNHScoreBreakdown/tree/main)
 
