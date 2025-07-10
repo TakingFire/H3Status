@@ -12,6 +12,7 @@ namespace H3Status.Patches
             var versionJSON = new JSONObject();
 
             versionJSON["version"] = Plugin.Version;
+            versionJSON["gameVersion"] = $"{GM.Version_UpdateNumber}.{GM.Version_AlphaNumber}.{GM.Version_PatchNumber}";
 
             return versionJSON;
         }
@@ -43,21 +44,52 @@ namespace H3Status.Patches
     {
         private static string[] holdNamesInstitution = {"HUB", "LIBRARY", "GARDEN", "ATRIUM", "LOBBY", "HEDRONS", "TURBINE", "HYDRO", "SPILLWAY", "RODS", "STORAGE", "APRROACH", "CROSSOVER", "PIPEWORKS", "VOID", "CONCOURSE", "BUNKER", "INCLINATOR", "ABYSS", "SUBSTATION"};
         private static string[] supplyNamesInstitution = { "ARRAY", "STUDIO", "SUITE", "LOFT", "PENTHOUSE", "GREENWALL", "FENESTRA", "JUDGEMENT", "PRESIDIO", "DISSONANCE", "CLERESTORY", "HELIX", "FACILITY", "STACKS", "ALTAR", "PUMP" };
+        private static bool isInitialized = false;
+
+        [HarmonyPrefix]
+        [HarmonyPatch(typeof(TNH_Manager), nameof(TNH_Manager.DelayedInit))]
+        private static void DelayedInitPre(TNH_Manager __instance)
+        {
+            isInitialized = __instance.m_hasInit;
+        }
+
+        [HarmonyPostfix]
+        [HarmonyPatch(typeof(TNH_Manager), nameof(TNH_Manager.DelayedInit))]
+        private static void DelayedInitPost(TNH_Manager __instance)
+        {
+            bool becameInitialized = !isInitialized && __instance.m_hasInit;
+            if (!becameInitialized) return;
+
+            var levelEventJSON = new JSONObject();
+
+            levelEventJSON["type"] = "TNHLevelEvent";
+            var levelJSON = levelEventJSON["status"].AsObject;
+            levelJSON["seed"] = __instance.m_seed;
+            levelJSON["levelName"] = __instance.LevelName;
+            levelJSON["characterName"] = __instance.C.DisplayName;
+            levelJSON["aiDifficulty"] = __instance.AI_Difficulty.ToString();
+            levelJSON["radarMode"] = __instance.RadarMode.ToString();
+            levelJSON["targetMode"] = __instance.TargetMode.ToString();
+            levelJSON["healthMode"] = __instance.HealthMode.ToString();
+            levelJSON["equipmentMode"] = __instance.EquipmentMode.ToString();
+
+            Server.ServerBehavior.SendMessage(levelEventJSON);
+        }
 
         [HarmonyPostfix]
         [HarmonyPatch(typeof(TNH_Manager), nameof(TNH_Manager.SetPhase))]
         private static void TakeAndHoldPhase(TNH_Phase p, TNH_Manager __instance)
         {
-            var levelEventJSON = new JSONObject();
+            var phaseEventJSON = new JSONObject();
 
-            levelEventJSON["type"] = "TNHPhaseEvent";
-            var levelJSON = levelEventJSON["status"].AsObject;
-            levelJSON["phase"] = p.ToString();
-            levelJSON["level"] = __instance.m_level;
-            levelJSON["count"] = __instance.m_maxLevels;
-            levelJSON["seed"] = __instance.m_seed;
-            levelJSON["hold"] = __instance.m_curHoldIndex;
-            var supplyPointsJSON = levelJSON["supply"].AsArray;
+            phaseEventJSON["type"] = "TNHPhaseEvent";
+            var phaseJSON = phaseEventJSON["status"].AsObject;
+            phaseJSON["phase"] = p.ToString();
+            phaseJSON["level"] = __instance.m_level;
+            phaseJSON["count"] = __instance.m_maxLevels;
+            phaseJSON["seed"] = __instance.m_seed;
+            phaseJSON["hold"] = __instance.m_curHoldIndex;
+            var supplyPointsJSON = phaseJSON["supply"].AsArray;
             foreach(int i in __instance.m_activeSupplyPointIndicies)
             {
                 supplyPointsJSON.Add(i);
@@ -65,15 +97,15 @@ namespace H3Status.Patches
 
             if (SceneHandler.activeScene == "Institution")
             {
-                levelJSON["holdName"] = holdNamesInstitution[__instance.m_curHoldIndex];
-                var supplyPointNamesJSON = levelJSON["supplyNames"].AsArray;
+                phaseJSON["holdName"] = holdNamesInstitution[__instance.m_curHoldIndex];
+                var supplyPointNamesJSON = phaseJSON["supplyNames"].AsArray;
                 foreach(int i in __instance.m_activeSupplyPointIndicies)
                 {
                     supplyPointNamesJSON.Add(supplyNamesInstitution[i]);
                 }
             }
 
-            Server.ServerBehavior.SendMessage(levelEventJSON);
+            Server.ServerBehavior.SendMessage(phaseEventJSON);
         }
 
         [HarmonyPostfix]
@@ -167,6 +199,33 @@ namespace H3Status.Patches
             Server.ServerBehavior.SendMessage(scoreEventJSON);
         }
 
+        [HarmonyPostfix]
+        [HarmonyPatch(typeof(TNH_Manager), nameof(TNH_Manager.AddTokens))]
+        private static void AddTokens(int i, TNH_Manager __instance)
+        {
+            var tokenEventJSON = new JSONObject();
+
+            tokenEventJSON["type"] = "TNHTokenEvent";
+            var tokenJSON = tokenEventJSON["status"].AsObject;
+            tokenJSON["change"] = i;
+            tokenJSON["tokens"] = __instance.m_numTokens;
+
+            Server.ServerBehavior.SendMessage(tokenEventJSON);
+        }
+
+        [HarmonyPostfix]
+        [HarmonyPatch(typeof(TNH_Manager), nameof(TNH_Manager.SubtractTokens))]
+        private static void SubtractTokens(int i, TNH_Manager __instance)
+        {
+            var tokenEventJSON = new JSONObject();
+
+            tokenEventJSON["type"] = "TNHTokenEvent";
+            var tokenJSON = tokenEventJSON["status"].AsObject;
+            tokenJSON["change"] = -i;
+            tokenJSON["tokens"] = __instance.m_numTokens;
+
+            Server.ServerBehavior.SendMessage(tokenEventJSON);
+        }
 
         [HarmonyPrefix]
         [HarmonyPatch(typeof(TNH_Manager), nameof(TNH_Manager.OnSosigAlert))]
@@ -228,9 +287,9 @@ namespace H3Status.Patches
         {
             var healthEventJSON = new JSONObject();
 
-            healthEventJSON["type"] = "playerDamage";
+            healthEventJSON["type"] = "healthEvent";
             var healthJSON = healthEventJSON["status"].AsObject;
-            healthJSON["amount"] = -(int)DamagePoints;
+            healthJSON["change"] = -(int)DamagePoints;
             healthJSON["health"] = (int)__instance.Health;
             healthJSON["maxHealth"] = (int)__instance.m_startingHealth;
 
@@ -243,9 +302,9 @@ namespace H3Status.Patches
         {
             var healthEventJSON = new JSONObject();
 
-            healthEventJSON["type"] = "playerDamage";
+            healthEventJSON["type"] = "healthEvent";
             var healthJSON = healthEventJSON["status"].AsObject;
-            healthJSON["amount"] = -(int)(__instance.m_startingHealth * f);
+            healthJSON["change"] = -(int)(__instance.m_startingHealth * f);
             healthJSON["health"] = (int)__instance.Health;
             healthJSON["maxHealth"] = (int)__instance.m_startingHealth;
 
@@ -254,16 +313,30 @@ namespace H3Status.Patches
 
         [HarmonyPostfix]
         [HarmonyPatch(typeof(FVRPlayerBody), nameof(FVRPlayerBody.Init))]
-        [HarmonyPatch(typeof(FVRPlayerBody), nameof(FVRPlayerBody.SetHealthThreshold))]
-        private static void SetHealthThreshold(FVRPlayerBody __instance)
+        private static void Init(FVRPlayerBody __instance)
         {
             var healthEventJSON = new JSONObject();
 
-            healthEventJSON["type"] = "playerHeal";
+            healthEventJSON["type"] = "healthEvent";
             var healthJSON = healthEventJSON["status"].AsObject;
-            healthJSON["amount"] = 0;
+            healthJSON["change"] = 0;
             healthJSON["health"] = (int)__instance.Health;
             healthJSON["maxHealth"] = (int)__instance.m_startingHealth;
+
+            Server.ServerBehavior.SendMessage(healthEventJSON);
+        }
+
+        [HarmonyPrefix]
+        [HarmonyPatch(typeof(FVRPlayerBody), nameof(FVRPlayerBody.SetHealthThreshold))]
+        private static void SetHealthThreshold(float h, FVRPlayerBody __instance)
+        {
+            var healthEventJSON = new JSONObject();
+
+            healthEventJSON["type"] = "healthEvent";
+            var healthJSON = healthEventJSON["status"].AsObject;
+            healthJSON["change"] = (int)(h - __instance.Health);
+            healthJSON["health"] = (int)h;
+            healthJSON["maxHealth"] = (int)h;
 
             Server.ServerBehavior.SendMessage(healthEventJSON);
         }
@@ -274,22 +347,11 @@ namespace H3Status.Patches
         {
             var healthEventJSON = new JSONObject();
 
-            healthEventJSON["type"] = "playerHeal";
+            healthEventJSON["type"] = "healthEvent";
             var healthJSON = healthEventJSON["status"].AsObject;
-            healthJSON["amount"] = (int)(__instance.m_startingHealth * f);
+            healthJSON["change"] = (int)(__instance.m_startingHealth * f);
             healthJSON["health"] = (int)__instance.Health;
             healthJSON["maxHealth"] = (int)__instance.m_startingHealth;
-
-            Server.ServerBehavior.SendMessage(healthEventJSON);
-        }
-
-        [HarmonyPostfix]
-        [HarmonyPatch(typeof(GM), nameof(GM.KillPlayer), new[] {typeof(bool), typeof(int)})]
-        private static void KillPlayer(bool KilledSelf, int iff)
-        {
-            var healthEventJSON = new JSONObject();
-
-            healthEventJSON["type"] = "playerKill";
 
             Server.ServerBehavior.SendMessage(healthEventJSON);
         }
@@ -326,7 +388,7 @@ namespace H3Status.Patches
 
             var powerEventJSON = new JSONObject();
 
-            powerEventJSON["type"] = "playerBuff";
+            powerEventJSON["type"] = "buffEvent";
             var powerJSON = powerEventJSON["status"].AsObject;
             powerJSON["type"] = type.ToString();
             powerJSON["duration"] = duration;

@@ -1,4 +1,4 @@
-# H3Status Event Reference
+# H3Status 0.2.0 Event Reference
 
 > ⚠️ **Warning:** This data structure is **under development** and is **subject to change**.
 
@@ -22,24 +22,33 @@ Every message sent by the server follows this format.\
 
 ```js
   {
-    "type":   String,
+    "type"  : String,
     "status": Object,
   }
 ```
 
 Type | Status | Description
 ---- | ------ | -----------
-`"hello"` | | Sent on initial connection.
+`"hello"` | [VersionStatus](Protocol.md#versionstatus-object) | Sent on initial connection.
 `"sceneEvent"` | [SceneStatus](Protocol.md#scenestatus-object) | Sent when a scene is loaded or reloaded.
 `"ammoEvent"` | [AmmoStatus](Protocol.md#ammostatus-object) | Sent when the ammunition in a weapon changes.
+`"healthEvent"` | [HealthStatus](Protocol.md#healthstatus-object) | Sent when the player health changes.
+`"buffEvent"` | [BuffStatus](Protocol.md#buffstatus-object) | Sent when the player uses a powerup.
+`"TNHLevelEvent"` | [TNHLevelStatus](Protocol.md#tnhlevelstatus-object) | Sent when a T&H run begins.
 `"TNHPhaseEvent"` | [TNHPhaseStatus](Protocol.md#tnhphasestatus-object) | Sent on phase change in T&H, e.g. Take, Hold, and Complete.
 `"TNHHoldPhaseEvent"` | [TNHHoldPhaseStatus](Protocol.md#tnhholdphasestatus-object) | Sent on Hold phase change in T&H, e.g. Analyzing and Hacking.
 `"TNHLostStealthBonus"`<br>`"TNHLostNoHitBonus"` | | Sent when a point bonus is lost in T&H.
 `"TNHScoreEvent"` | [TNHScoreStatus](Protocol.md#tnhscorestatus-object) | Sent when the score changes in T&H.
-`"playerDamage"`<br>`"playerHeal"` | [HealthStatus](Protocol.md#healthstatus-object) | Sent when the player health changes.
-`"playerKill"` | | Sent when the player dies.
-`"playerBuff"` | [BuffStatus](Protocol.md#buffstatus-object) | Sent when the player uses a powerup.
+`"TNHTokenEvent"` | [TNHTokenStatus](Protocol.md#tnhtokenstatus-object) | Sent when the override token count changes in T&H.
 
+### VersionStatus Object
+
+```js
+{
+  "version"    : String, // Mod version (major.minor.patch)
+  "gameVersion": String, // Game version (update.alpha.patch)
+}
+```
 
 ### SceneStatus Object
 
@@ -64,6 +73,65 @@ Type | Status | Description
 }
 ```
 
+### HealthStatus Object
+
+```js
+{
+  "change"   : Number, // The change in player health
+  "health"   : Number, // The player's current health
+  "maxHealth": Number, // The player's maximum health
+}
+```
+
+### BuffStatus object
+
+```js
+{
+  "type"    : String,  // The type of powerup used
+  "duration": Number,  // The duration of the effect
+  "inverted": Boolean, // Whether the effect is inverted
+}
+```
+
+<details>
+  <summary><strong>Buff Types</strong></summary>
+
+```js
+[
+  "Health",
+  "QuadDamage",    // "Bullet Boost"
+  "InfiniteAmmo",
+  "Invincibility", // "Shield"
+  "GhostMode",
+  "FarOutMeat",
+  "MuscleMeat",
+  "HomeTown",
+  "SnakeEye",
+  "Blort",
+  "Regen",
+  "Cyclops",
+  "WheredIGo",
+  "ChillOut",
+]
+```
+
+</details>
+
+### TNHLevelStatus Object
+
+```js
+{
+  "seed"         : Number // Chosen seed
+  "levelName"    : String // Name of the current level
+  "characterName": String // Name of the current character
+  "aiDifficulty" : String // "Standard" | "Arcade"
+  "radarMode"    : String // "Standard" | "Omnipresent" | "Off"
+  "targetMode"   : String // "AllTypes" | "Simple" | "NoTargets"
+  "healthMode"   : String // "StandardHealth" | "HardcoreOneHit" | "CustomHealth"
+  "equipmentMode": String // "Spawnlocking" | "LimitedAmmo"
+}
+```
+
 ### TNHPhaseStatus Object
 
 ```js
@@ -73,8 +141,8 @@ Type | Status | Description
   "count": Number, // Total levels (number of Holds)
   "seed" : Number, // Chosen seed
 
-  "hold"    : Number,   // Index of the current hold
-  "supply"  : Number[], // Indices of the current supply points
+  "hold"  : Number,   // Index of the current hold
+  "supply": Number[], // Indices of the current supply points
 
   // INSTITUTION ONLY:
   "holdName"   : String, // Name of the current Hold
@@ -128,17 +196,17 @@ Type | Status | Description
 
 ```js
 [
-	"Static",
-	"Hardened",
-	"Swarm",
-	"Recursive",
-	"Stealth",
-	"Agile",
-	"Regenerative",
-	"Polymorphic",
-	"Cascading",
-	"Orthagonal",
-	"Refractive",
+  "Static",
+  "Hardened",
+  "Swarm",
+  "Recursive",
+  "Stealth",
+  "Agile",
+  "Regenerative",
+  "Polymorphic",
+  "Cascading",
+  "Orthagonal",
+  "Refractive",
 ]
 ```
 
@@ -180,46 +248,11 @@ Type | Status | Description
 
 </details>
 
-### HealthStatus Object
+### TNHTokenStatus Object
 
 ```js
 {
-  "amount"   : Number, // The change in player health
-  "health"   : Number, // The player's current health
-  "maxHealth": Number, // The player's maximum health
+  "change" : Number, // The change in player override tokens
+  "tokens": Number, // The current override token count
 }
 ```
-
-### BuffStatus object
-
-```js
-{
-  "type"    : String,  // The type of powerup used
-  "duration": Number,  // The duration of the effect
-  "inverted": Boolean, // Whether the effect is inverted
-}
-```
-
-<details>
-  <summary><strong>Buff Types</strong></summary>
-
-```js
-[
-  "Health",
-	"QuadDamage",    // "Bullet Boost"
-	"InfiniteAmmo",
-	"Invincibility", // "Shield"
-	"GhostMode",
-	"FarOutMeat",
-	"MuscleMeat",
-	"HomeTown",
-	"SnakeEye",
-	"Blort",
-	"Regen",
-	"Cyclops",
-	"WheredIGo",
-	"ChillOut",
-]
-```
-
-</details>

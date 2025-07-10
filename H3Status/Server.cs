@@ -15,7 +15,7 @@ namespace H3Status.Server
             _instances.Add(this);
 
             var eventJSON = new JSONObject();
-            eventJSON["event"] = "hello";
+            eventJSON["type"] = "hello";
             eventJSON["status"] = Patches.VersionHandler.GetVersionInfo();
 
             this.SendAsync(eventJSON.ToString(), null);
