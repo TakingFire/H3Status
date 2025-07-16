@@ -122,8 +122,9 @@ namespace H3Status.Patches
             phaseJSON["phase"] = __instance.m_state.ToString();
             phaseJSON["level"] = __instance.m_phaseIndex;
             phaseJSON["count"] = __instance.H.Phases.Count;
-            phaseJSON["encryption"] = __instance.m_curPhase.Encryption.ToString();
+            phaseJSON["encryptionType"] = __instance.m_curPhase.Encryption.ToString();
             phaseJSON["encryptionCount"] = __instance.m_numTargsToSpawn;
+            phaseJSON["encryptionTime"] = 120f;
 
             Server.ServerBehavior.SendMessage(phaseEventJSON);
         }
