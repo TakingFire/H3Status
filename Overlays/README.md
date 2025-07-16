@@ -19,7 +19,7 @@ Download: [DownGit](https://downgit.github.io/#/home?url=https://github.com/Taki
 A Take and Hold focused overlay that tracks time and score while clearing encryption nodes.\
 Automatically hides itself when not in use.
 
-> ![Preview Image](https://github.com/user-attachments/assets/3e1764be-b43f-4849-88b0-3cb721fa768c)
+> ![Preview Image](https://github.com/user-attachments/assets/90e101f0-3440-4cb4-a94b-e01626025383)
 
 **Direct URL: [encryption.overlays.bacur.xyz](https://encryption.overlays.bacur.xyz)**\
 Download: [DownGit](https://downgit.github.io/#/home?url=https://github.com/TakingFire/H3Status/tree/main/Overlays/TNHEncryptionTimer)
