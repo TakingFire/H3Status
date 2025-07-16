@@ -46,17 +46,18 @@ function onMessage(e) {
 
     case "TNHHoldPhaseEvent":
       if (event.status.phase == "Analyzing") {
-        encryptionType = event.status.encryption;
+        encryptionType = event.status.encryptionType;
         encryptionCount = event.status.encryptionCount;
+        countdown.duration = event.status.encryptionTime;
 
         document.getElementById("encryption-count").textContent =
           "x" + encryptionCount;
         document.getElementById("encryption-icon").src =
           `icons/${encryptionType}.webp`;
 
-        document.getElementById("score").textContent = "00000";
-        document.getElementById("score-lost").textContent = "-000";
-        document.getElementById("clock-value").textContent = "0.0";
+        clockText.setValue(0);
+        scoreText.setValue(0);
+        scoreLostText.setValue(0);
 
         showOverlay();
         setTimeout(() => {
@@ -145,18 +146,19 @@ class Countdown {
 
     this.interval = setInterval(() => {
       this.value = Math.max(0, this.value - 0.1);
+      if (this.value <= 0) this.stop();
 
       const progress = this.value / this.duration;
-      const clock = (this.duration - this.value).toFixed(1);
-      const score = Math.floor(this.value * 50 * scoreMultiplier);
-      const scoreLost = -(6000 * scoreMultiplier - score);
+      const clock = this.duration - this.value;
+      const score = this.value * 50 * scoreMultiplier;
+      const scoreLost = 6000 * scoreMultiplier - score;
 
       if (this.value <= 60) timerBar.setColor("#f44");
       timerBar.setValue((progress % 0.5) * 2);
 
-      document.getElementById("score").textContent = score;
-      document.getElementById("score-lost").textContent = scoreLost;
-      document.getElementById("clock-value").textContent = clock;
+      clockText.setValue(clock);
+      scoreText.setValue(score);
+      scoreLostText.setValue(scoreLost);
     }, 100);
   }
 
@@ -254,6 +256,33 @@ class CircleBar extends Canvas {
     this.ctx.stroke();
   }
 }
+
+class AnimatedText {
+  constructor(id, format) {
+    this.element = document.getElementById(id);
+    this.value = 0;
+    this.format = format || ((value) => Math.floor(value));
+
+    this.animator = createAnimatable(this, {
+      value: 250,
+      ease: eases.outCubic,
+      onUpdate: () => (this.element.textContent = this.format(this.value)),
+    });
+  }
+
+  setValue(value) {
+    this.animator.value(value);
+  }
+}
+
+const clockText = new AnimatedText("clock", (value) => value.toFixed(1) + "s");
+const scoreText = new AnimatedText("score", (value) =>
+  Math.floor(value).toString().padStart(5, "0"),
+);
+const scoreLostText = new AnimatedText(
+  "score-lost",
+  (value) => "-" + Math.ceil(value).toString().padStart(5, "0"),
+);
 
 const countdown = new Countdown();
 const timerBar = new CircleBar("timer-bar", Math.PI, 2.5 * Math.PI);

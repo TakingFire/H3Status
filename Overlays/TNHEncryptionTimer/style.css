@@ -52,34 +52,18 @@ body {
 #encryption-icon {
     position: absolute;
     width: 80px;
-    /* bottom: 0; */
-    /* left: 0; */
-
-    /* filter: drop-shadow(1px 1px 0 white) drop-shadow(-1px 1px 0 white)
-        drop-shadow(1px -1px 0 white) drop-shadow(-1px -1px 0 white); */
-
     filter: drop-shadow(0px 0px 16px #000);
 }
 
 #encryption-count {
     position: absolute;
-    font-size: 24px;
+    font-size: 26px;
     font-weight: 700;
     color: #eee;
-    /* bottom: 0px; */
-    /* left: 64px; */
     margin-top: 40px;
     margin-left: 48px;
-
     text-shadow: -4px -4px 16px #000;
 }
-
-/* #clock {
-    font-size: 36px;
-    font-variant-numeric: tabular-nums;
-    font-weight: 600;
-    color: #fffd;
-} */
 
 #counter {
     display: flex;
@@ -89,7 +73,6 @@ body {
 }
 
 #score {
-    /* margin-left: 8px; */
     font-size: 42px;
     font-weight: 700;
     color: #fffd;
@@ -99,7 +82,7 @@ body {
 
 #clock,
 #score-lost {
-    font-size: 24px;
+    font-size: 26px;
     font-weight: 500;
     color: #fff8;
     font-variant-numeric: tabular-nums;
