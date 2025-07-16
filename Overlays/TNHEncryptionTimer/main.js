@@ -56,7 +56,7 @@ function onMessage(e) {
           `icons/${encryptionType}.webp`;
 
         clockText.setValue(0);
-        scoreText.setValue(0);
+        scoreText.setValue(countdown.duration * 50 * scoreMultiplier);
         scoreLostText.setValue(0);
 
         showOverlay();

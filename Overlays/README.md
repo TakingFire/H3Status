@@ -14,6 +14,16 @@ Featuring a score counter, hold progress, and icons for every ammo type in the g
 **Direct URL: [tnh.overlays.bacur.xyz](https://tnh.overlays.bacur.xyz)**\
 Download: [DownGit](https://downgit.github.io/#/home?url=https://github.com/TakingFire/H3Status/tree/main/Overlays/TNHScoreLog)
 
+### [TNH Encryption Timer](TNHEncryptionTimer/)
+
+A Take and Hold focused overlay that tracks time and score while clearing encryption nodes.\
+Automatically hides itself when not in use.
+
+> ![Preview Image](https://github.com/user-attachments/assets/3e1764be-b43f-4849-88b0-3cb721fa768c)
+
+**Direct URL: [encryption.overlays.bacur.xyz](https://encryption.overlays.bacur.xyz)**\
+Download: [DownGit](https://downgit.github.io/#/home?url=https://github.com/TakingFire/H3Status/tree/main/Overlays/TNHEncryptionTimer)
+
 ### [TNH Score Breakdown](https://github.com/quilavad/TNHScoreBreakdown) by [Quilavad](https://github.com/quilavad)
 
 An extension to [TNHScoreLog](#tnh-score-log) that records and displays a detailed score breakdown upon run completion.\
