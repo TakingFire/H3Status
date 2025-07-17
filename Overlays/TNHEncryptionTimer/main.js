@@ -31,6 +31,10 @@ function onMessage(e) {
   const event = JSON.parse(e.data);
 
   switch (event.type) {
+    case "sceneEvent":
+      hideOverlay();
+      break;
+
     case "TNHLevelEvent":
       scoreMultiplier = event.status.scoreMultiplier;
       break;
@@ -209,7 +213,7 @@ function drawTickMark() {
   );
   tickMarks.ctx.lineTo(
     60 * Math.cos(angle) + tickMarks.width / 2,
-    60 * Math.sin(angle) + tickMarks.width / 2,
+    60 * Math.sin(angle) + tickMarks.height / 2,
   );
   tickMarks.ctx.stroke();
 }
