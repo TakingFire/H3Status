@@ -136,7 +136,7 @@ function handlePhaseEvent(event) {
         }
       } else {
         eventLog.addItem(
-          `SEED: ${event.seed} - HOLDS: ${event.count}`,
+          `SEED: ${event.seed} - HOLDS: ${event.count > 99 ? "ENDLESS" : event.count}`,
           "#8cf",
           10,
         );
@@ -145,12 +145,14 @@ function handlePhaseEvent(event) {
         eventLog.addItem(`NEXT TARGET: ${event.holdName}`, "#8cf", 10);
         // eventLog.addItem(`RESUPPLY AT: ${event.supplyNames[0]}`, "#8cf", 10);
       }
-      const holdsRemaining = event.count - event.level;
-      eventLog.addItem(
-        `${holdsRemaining} HOLD${holdsRemaining > 1 ? "S" : ""} REMAINING`,
-        "#8cf",
-        10,
-      );
+      if (event.count < 99) {
+        const holdsRemaining = event.count - event.level;
+        eventLog.addItem(
+          `${holdsRemaining} HOLD${holdsRemaining > 1 ? "S" : ""} REMAINING`,
+          "#8cf",
+          10,
+        );
+      }
       break;
     }
     case "Hold": {
