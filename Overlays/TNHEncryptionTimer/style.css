@@ -30,7 +30,7 @@ body {
     padding: 8px;
     padding-right: 16px;
     border-radius: 100px;
-    background-color: #0004;
+    background-color: #0008;
 }
 
 #timer {
@@ -42,7 +42,7 @@ body {
     height: 170px;
 }
 
-#health-bar,
+#tick-marks,
 #timer-bar {
     position: absolute;
     width: 100%;

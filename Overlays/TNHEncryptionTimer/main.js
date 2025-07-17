@@ -36,12 +36,17 @@ function onMessage(e) {
       break;
 
     case "TNHEncryptionDestroyed":
-      document.getElementById("encryption-count").textContent =
-        "x" + --encryptionCount;
+      // Cascading turns into multiple full encryptions,
+      // so the counter would go into the negatives here
+      if (encryptionType == "Cascading") break;
+
+      encryptionCountText.setValue(--encryptionCount, 0);
       animate("#encryption-count", {
         scale: [1.5, 1],
         duration: 250,
       });
+
+      drawTickMark();
       break;
 
     case "TNHHoldPhaseEvent":
@@ -50,14 +55,14 @@ function onMessage(e) {
         encryptionCount = event.status.encryptionCount;
         countdown.duration = event.status.encryptionTime;
 
-        document.getElementById("encryption-count").textContent =
-          "x" + encryptionCount;
+        encryptionCountText.setValue(encryptionCount, 500);
         document.getElementById("encryption-icon").src =
           `icons/${encryptionType}.webp`;
 
-        clockText.setValue(0);
-        scoreText.setValue(countdown.duration * 50 * scoreMultiplier);
-        scoreLostText.setValue(0);
+        clockText.setValue(0, 500);
+        scoreText.setValue(countdown.duration * 50 * scoreMultiplier, 500);
+        scoreLostText.setValue(0, 500);
+        tickMarks.clear();
 
         showOverlay();
         setTimeout(() => {
@@ -68,6 +73,7 @@ function onMessage(e) {
         timerBar.setColor("#f80");
         countdown.start();
       } else if (event.status.phase == "Transition") {
+        encryptionCountText.setValue(0, 0);
         countdown.stop();
         timerBar.setColor("#0dd");
       }
@@ -140,26 +146,29 @@ class Countdown {
     this.value = this.duration;
   }
 
+  updateTimer() {
+    this.value = Math.max(0, this.value - 0.1);
+    if (this.value <= 0) this.stop();
+
+    const progress = this.value / this.duration;
+    const clock = this.duration - this.value;
+    const score = this.value * 50 * scoreMultiplier;
+    const scoreLost = 6000 * scoreMultiplier - score;
+
+    if (this.value <= 60) timerBar.setColor("#f44");
+    timerBar.setValue((progress % 0.5) * 2);
+
+    clockText.setValue(clock, 100);
+    scoreText.setValue(score, 100);
+    scoreLostText.setValue(scoreLost, 100);
+  }
+
   start() {
     this.value = this.duration;
     if (this.interval != null) return;
 
-    this.interval = setInterval(() => {
-      this.value = Math.max(0, this.value - 0.1);
-      if (this.value <= 0) this.stop();
-
-      const progress = this.value / this.duration;
-      const clock = this.duration - this.value;
-      const score = this.value * 50 * scoreMultiplier;
-      const scoreLost = 6000 * scoreMultiplier - score;
-
-      if (this.value <= 60) timerBar.setColor("#f44");
-      timerBar.setValue((progress % 0.5) * 2);
-
-      clockText.setValue(clock);
-      scoreText.setValue(score);
-      scoreLostText.setValue(scoreLost);
-    }, 100);
+    this.updateTimer();
+    this.interval = setInterval(() => this.updateTimer(), 100);
   }
 
   stop() {
@@ -183,6 +192,26 @@ class Canvas {
   clear() {
     this.ctx.clearRect(0, 0, this.width, this.height);
   }
+}
+
+function drawTickMark() {
+  const distance = timerBar.end - timerBar.start;
+  const angle = timerBar.start + distance * timerBar.value;
+
+  tickMarks.ctx.globalAlpha = 0.5;
+  tickMarks.ctx.strokeStyle = "#fff";
+  tickMarks.ctx.lineWidth = 2;
+
+  tickMarks.ctx.beginPath();
+  tickMarks.ctx.moveTo(
+    80 * Math.cos(angle) + tickMarks.width / 2,
+    80 * Math.sin(angle) + tickMarks.height / 2,
+  );
+  tickMarks.ctx.lineTo(
+    60 * Math.cos(angle) + tickMarks.width / 2,
+    60 * Math.sin(angle) + tickMarks.width / 2,
+  );
+  tickMarks.ctx.stroke();
 }
 
 class CircleBar extends Canvas {
@@ -270,8 +299,8 @@ class AnimatedText {
     });
   }
 
-  setValue(value) {
-    this.animator.value(value);
+  setValue(value, duration) {
+    this.animator.value(value, duration);
   }
 }
 
@@ -283,7 +312,12 @@ const scoreLostText = new AnimatedText(
   "score-lost",
   (value) => "-" + Math.ceil(value).toString().padStart(5, "0"),
 );
+const encryptionCountText = new AnimatedText(
+  "encryption-count",
+  (value) => "x" + Math.floor(value),
+);
 
 const countdown = new Countdown();
+const tickMarks = new Canvas("tick-marks");
 const timerBar = new CircleBar("timer-bar", Math.PI, 2.5 * Math.PI);
 connect();
