@@ -106,14 +106,14 @@ function showOverlay() {
     scale: 1,
     opacity: 1,
     duration: 750,
-    delay: 250,
-    ease: eases.outCubic,
+    delay: 500,
+    ease: eases.outBack(),
   });
 
   animate("#counter > *", {
     x: 0,
     opacity: 1,
-    delay: stagger(100, { start: 250 }),
+    delay: stagger(100, { start: 500 }),
     duration: 500,
     ease: eases.outCubic,
   });
@@ -208,12 +208,12 @@ function drawTickMark() {
 
   tickMarks.ctx.beginPath();
   tickMarks.ctx.moveTo(
-    80 * Math.cos(angle) + tickMarks.width / 2,
-    80 * Math.sin(angle) + tickMarks.height / 2,
+    75 * Math.cos(angle) + tickMarks.width / 2,
+    75 * Math.sin(angle) + tickMarks.height / 2,
   );
   tickMarks.ctx.lineTo(
-    60 * Math.cos(angle) + tickMarks.width / 2,
-    60 * Math.sin(angle) + tickMarks.height / 2,
+    55 * Math.cos(angle) + tickMarks.width / 2,
+    55 * Math.sin(angle) + tickMarks.height / 2,
   );
   tickMarks.ctx.stroke();
 }
@@ -260,14 +260,14 @@ class CircleBar extends Canvas {
     this.ctx.lineWidth = 20;
     this.ctx.strokeStyle = "#fff";
     this.ctx.shadowColor = "transparent";
-    this.ctx.arc(this.width / 2, this.height / 2, 70, this.start, this.end);
+    this.ctx.arc(this.width / 2, this.height / 2, 65, this.start, this.end);
     this.ctx.stroke();
 
     this.ctx.beginPath();
     this.ctx.globalAlpha = 1;
     this.ctx.shadowColor = this.color;
     this.ctx.strokeStyle = this.color;
-    this.ctx.arc(this.width / 2, this.height / 2, 70, this.start, angle);
+    this.ctx.arc(this.width / 2, this.height / 2, 65, this.start, angle);
     this.ctx.stroke();
 
     this.ctx.beginPath();
@@ -275,14 +275,14 @@ class CircleBar extends Canvas {
     this.ctx.lineWidth = 10;
     this.ctx.strokeStyle = "#fff";
     this.ctx.shadowColor = "transparent";
-    this.ctx.arc(this.width / 2, this.height / 2, 65, this.start, this.end);
+    this.ctx.arc(this.width / 2, this.height / 2, 60, this.start, this.end);
     this.ctx.stroke();
 
     this.ctx.beginPath();
     this.ctx.arc(
       this.width / 2,
       this.height / 2,
-      65,
+      60,
       this.end + 0.1,
       this.start - 0.1,
     );
