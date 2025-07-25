@@ -11,7 +11,7 @@ function connect() {
 }
 
 function onOpen() {
-  eventLog.addItem("CONNECTED");
+  eventLog.addItem("CONNECTED", "#8cf", 10);
 }
 
 function onClose() {
@@ -41,6 +41,7 @@ function onMessage(e) {
       handleScoreEvent(event.status);
       break;
     case "TNHTokenEvent":
+      handleTokenEvent(event.status);
       break;
     case "TNHPhaseEvent":
       handlePhaseEvent(event.status);
@@ -293,6 +294,19 @@ function handleScoreEvent(event) {
   }
   if (globalConfig.showEventLog) {
     eventLog.addItem(`${event.value * event.mult}: ${getEventString(event)}`);
+  }
+}
+
+function handleTokenEvent(event) {
+  const words = ["", "ONE", "TWO", "THREE", "FOUR", "FIVE"];
+  if (event.change <= 0) return;
+  if (event.change > 1) {
+    eventLog.addItem(
+      `${words[event.change] || event.change} TOKENS FOUND (${event.tokens})`,
+      "#8cf",
+    );
+  } else {
+    eventLog.addItem(`OVERRIDE TOKEN FOUND (${event.tokens})`, "#8cf");
   }
 }
 
