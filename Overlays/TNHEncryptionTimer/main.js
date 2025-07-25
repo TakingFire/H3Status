@@ -66,10 +66,10 @@ function onMessage(e) {
         clockText.setValue(0, 500);
         scoreText.setValue(countdown.duration * 50 * scoreMultiplier, 500);
         scoreLostText.setValue(0, 500);
-        tickMarks.clear();
 
         showOverlay();
         setTimeout(() => {
+          tickMarks.clear();
           timerBar.setValue(1);
           timerBar.setColor("#fc0");
         }, 500);
