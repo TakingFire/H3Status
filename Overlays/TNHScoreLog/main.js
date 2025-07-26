@@ -1,7 +1,9 @@
 const { animate, createAnimatable, utils, eases } = anime;
 
 function connect() {
-  const ws = new WebSocket("ws://localhost:" + globalConfig.webSocketPort);
+  const ws = new WebSocket(
+    `ws://${globalConfig.webSocketAddress}:${globalConfig.webSocketPort}`,
+  );
   eventLog.addItem("CONNECTING...");
   ws.onopen = onOpen;
   ws.onclose = onClose;
@@ -676,10 +678,12 @@ class AmmoCounter {
 }
 
 for (const [key, value] of new URLSearchParams(window.location.search)) {
+  console.log(key, value);
   if (globalConfig[key] != undefined) {
     if (typeof globalConfig[key] == "number") globalConfig[key] = Number(value);
-    if (typeof globalConfig[key] == "boolean")
+    else if (typeof globalConfig[key] == "boolean")
       globalConfig[key] = value == "true";
+    else globalConfig[key] = value;
   }
 }
 
