@@ -2,7 +2,7 @@ const { animate, createAnimatable, utils, eases } = anime;
 
 function connect() {
   const ws = new WebSocket(
-    `ws://${globalConfig.webSocketAddress}:${globalConfig.webSocketPort}`,
+    `ws${globalConfig.webSocketAddress != "localhost" ? "s" : ""}://${globalConfig.webSocketAddress}:${globalConfig.webSocketPort}`,
   );
   eventLog.addItem("CONNECTING...");
   ws.onopen = onOpen;
