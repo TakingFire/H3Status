@@ -17,13 +17,15 @@ public class Plugin : BaseUnityPlugin
     internal static new ManualLogSource Logger;
     private static Harmony _harmony;
 
-    public static HttpServer server;
-    public static int port = 9504;
+    public static WebSocketServer server;
 
     private void Awake()
     {
+        H3Status.Config.ConfigManager.BindAll(Config);
+        int port = H3Status.Config.Connection.webSocketPort.Value;
+
         Logger = base.Logger;
-        server = new HttpServer(port);
+        server = new WebSocketServer(port);
         server.AddWebSocketService<Server.ServerBehavior>("/");
         server.Start();
 
@@ -41,5 +43,6 @@ public class Plugin : BaseUnityPlugin
     {
         server.Stop();
         _harmony.UnpatchSelf();
+        Config.Clear();
     }
 }
