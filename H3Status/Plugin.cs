@@ -17,19 +17,12 @@ public class Plugin : BaseUnityPlugin
     internal static new ManualLogSource Logger;
     private static Harmony _harmony;
 
-    public static WebSocketServer server;
-
     private void Awake()
     {
         H3Status.Config.ConfigManager.BindAll(Config);
         int port = H3Status.Config.Connection.webSocketPort.Value;
 
         Logger = base.Logger;
-        server = new WebSocketServer(port);
-        server.AddWebSocketService<Server.ServerBehavior>("/");
-        server.Start();
-
-        Logger.LogInfo($"Server started on port {port}");
 
         _harmony = new Harmony(Guid);
         _harmony.PatchAll(typeof(Patches.SceneHandler));
@@ -37,11 +30,13 @@ public class Plugin : BaseUnityPlugin
         _harmony.PatchAll(typeof(Patches.TNHPhaseHandler));
         _harmony.PatchAll(typeof(Patches.PlayerHealthHandler));
         _harmony.PatchAll(typeof(Patches.WeaponAmmoHandler));
+
+        Server.ServerManager.Start();
     }
 
     private void OnDestroy()
     {
-        server.Stop();
+        Server.ServerManager.Stop();
         _harmony.UnpatchSelf();
         Config.Clear();
     }

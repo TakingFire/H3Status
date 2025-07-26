@@ -2,6 +2,7 @@ using BepInEx.Configuration;
 
 namespace H3Status.Config
 {
+
     internal static class ConfigManager
     {
         public static void BindAll(ConfigFile config)
@@ -37,10 +38,11 @@ namespace H3Status.Config
                 "webSocketPort",
                 9504,
                 new ConfigDescription(
-                    "The port used for the WebSocket. External servers usually use port 443.",
+                    "The port used for the local WebSocket server.\nExternal connections use standard ports.",
                     new AcceptableValueRange<int>(0, 65535)
                 )
             );
         }
     }
+
 }

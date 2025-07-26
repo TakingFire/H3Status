@@ -35,7 +35,7 @@ namespace H3Status.Patches
             var sceneJSON = sceneEventJSON["status"].AsObject;
             sceneJSON["name"] = levelName;
 
-            Server.ServerBehavior.SendMessage(sceneEventJSON);
+            Server.ServerManager.Send(sceneEventJSON);
         }
     }
 
@@ -74,7 +74,7 @@ namespace H3Status.Patches
             levelJSON["healthMode"] = __instance.HealthMode.ToString();
             levelJSON["equipmentMode"] = __instance.EquipmentMode.ToString();
 
-            Server.ServerBehavior.SendMessage(levelEventJSON);
+            Server.ServerManager.Send(levelEventJSON);
         }
 
         [HarmonyPostfix]
@@ -106,7 +106,7 @@ namespace H3Status.Patches
                 }
             }
 
-            Server.ServerBehavior.SendMessage(phaseEventJSON);
+            Server.ServerManager.Send(phaseEventJSON);
         }
 
         [HarmonyPostfix]
@@ -126,7 +126,7 @@ namespace H3Status.Patches
             phaseJSON["encryptionCount"] = __instance.m_numTargsToSpawn;
             phaseJSON["encryptionTime"] = 120f;
 
-            Server.ServerBehavior.SendMessage(phaseEventJSON);
+            Server.ServerManager.Send(phaseEventJSON);
         }
     }
 
@@ -199,7 +199,7 @@ namespace H3Status.Patches
             scoreJSON["mult"] = GetMultiplier();
             scoreJSON["score"] = GetTotalScore();
 
-            Server.ServerBehavior.SendMessage(scoreEventJSON);
+            Server.ServerManager.Send(scoreEventJSON);
         }
 
         [HarmonyPostfix]
@@ -208,7 +208,7 @@ namespace H3Status.Patches
         {
             var encryptionEventJSON = new JSONObject();
             encryptionEventJSON["type"] = "TNHEncryptionDestroyed";
-            Server.ServerBehavior.SendMessage(encryptionEventJSON);
+            Server.ServerManager.Send(encryptionEventJSON);
         }
 
         [HarmonyPostfix]
@@ -222,7 +222,7 @@ namespace H3Status.Patches
             tokenJSON["change"] = i;
             tokenJSON["tokens"] = __instance.m_numTokens;
 
-            Server.ServerBehavior.SendMessage(tokenEventJSON);
+            Server.ServerManager.Send(tokenEventJSON);
         }
 
         [HarmonyPostfix]
@@ -236,7 +236,7 @@ namespace H3Status.Patches
             tokenJSON["change"] = -i;
             tokenJSON["tokens"] = __instance.m_numTokens;
 
-            Server.ServerBehavior.SendMessage(tokenEventJSON);
+            Server.ServerManager.Send(tokenEventJSON);
         }
 
         [HarmonyPrefix]
@@ -248,7 +248,7 @@ namespace H3Status.Patches
 
             var bonusEventJSON = new JSONObject();
             bonusEventJSON["type"] = "TNHLostStealthBonus";
-            Server.ServerBehavior.SendMessage(bonusEventJSON);
+            Server.ServerManager.Send(bonusEventJSON);
         }
 
         [HarmonyPrefix]
@@ -263,7 +263,7 @@ namespace H3Status.Patches
             {
                 var bonusEventJSON = new JSONObject();
                 bonusEventJSON["type"] = "TNHLostStealthBonus";
-                Server.ServerBehavior.SendMessage(bonusEventJSON);
+                Server.ServerManager.Send(bonusEventJSON);
             }
         }
 
@@ -275,7 +275,7 @@ namespace H3Status.Patches
 
             var bonusEventJSON = new JSONObject();
             bonusEventJSON["type"] = "TNHLostNoHitBonus";
-            Server.ServerBehavior.SendMessage(bonusEventJSON);
+            Server.ServerManager.Send(bonusEventJSON);
         }
 
         [HarmonyPrefix]
@@ -286,7 +286,7 @@ namespace H3Status.Patches
 
             var bonusEventJSON = new JSONObject();
             bonusEventJSON["type"] = "TNHLostNoHitBonus";
-            Server.ServerBehavior.SendMessage(bonusEventJSON);
+            Server.ServerManager.Send(bonusEventJSON);
         }
     }
 
@@ -305,7 +305,7 @@ namespace H3Status.Patches
             healthJSON["health"] = (int)__instance.Health;
             healthJSON["maxHealth"] = (int)__instance.m_startingHealth;
 
-            Server.ServerBehavior.SendMessage(healthEventJSON);
+            Server.ServerManager.Send(healthEventJSON);
         }
 
         [HarmonyPostfix]
@@ -320,7 +320,7 @@ namespace H3Status.Patches
             healthJSON["health"] = (int)__instance.Health;
             healthJSON["maxHealth"] = (int)__instance.m_startingHealth;
 
-            Server.ServerBehavior.SendMessage(healthEventJSON);
+            Server.ServerManager.Send(healthEventJSON);
         }
 
         [HarmonyPostfix]
@@ -335,7 +335,7 @@ namespace H3Status.Patches
             healthJSON["health"] = (int)__instance.Health;
             healthJSON["maxHealth"] = (int)__instance.m_startingHealth;
 
-            Server.ServerBehavior.SendMessage(healthEventJSON);
+            Server.ServerManager.Send(healthEventJSON);
         }
 
         [HarmonyPrefix]
@@ -350,7 +350,7 @@ namespace H3Status.Patches
             healthJSON["health"] = (int)h;
             healthJSON["maxHealth"] = (int)h;
 
-            Server.ServerBehavior.SendMessage(healthEventJSON);
+            Server.ServerManager.Send(healthEventJSON);
         }
 
         [HarmonyPostfix]
@@ -365,7 +365,7 @@ namespace H3Status.Patches
             healthJSON["health"] = (int)__instance.Health;
             healthJSON["maxHealth"] = (int)__instance.m_startingHealth;
 
-            Server.ServerBehavior.SendMessage(healthEventJSON);
+            Server.ServerManager.Send(healthEventJSON);
         }
 
         [HarmonyPostfix]
@@ -406,7 +406,7 @@ namespace H3Status.Patches
             powerJSON["duration"] = duration;
             powerJSON["inverted"] = isInverted;
 
-            Server.ServerBehavior.SendMessage(powerEventJSON);
+            Server.ServerManager.Send(powerEventJSON);
         }
     }
 
@@ -423,7 +423,7 @@ namespace H3Status.Patches
             if (isUpdatePending)
             {
                 isUpdatePending = false;
-                Server.ServerBehavior.SendMessage(ammoEventJSON);
+                Server.ServerManager.Send(ammoEventJSON);
             }
         }
 
