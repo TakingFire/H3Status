@@ -11,7 +11,7 @@ public class Plugin : BaseUnityPlugin
 {
     public const string Guid = "xyz.bacur.plugins.h3status";
     public const string Name = "H3Status";
-    public const string Version = "0.3.0";
+    public const string Version = "0.4.0";
 
 
     internal static new ManualLogSource Logger;

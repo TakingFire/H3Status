@@ -42,8 +42,8 @@ namespace H3Status.Patches
     [HarmonyPatch]
     internal static class TNHPhaseHandler
     {
-        private static string[] holdNamesInstitution = {"HUB", "LIBRARY", "GARDEN", "ATRIUM", "LOBBY", "HEDRONS", "TURBINE", "HYDRO", "SPILLWAY", "RODS", "STORAGE", "APRROACH", "CROSSOVER", "PIPEWORKS", "VOID", "CONCOURSE", "BUNKER", "INCLINATOR", "ABYSS", "SUBSTATION"};
-        private static string[] supplyNamesInstitution = { "ARRAY", "STUDIO", "SUITE", "LOFT", "PENTHOUSE", "GREENWALL", "FENESTRA", "JUDGEMENT", "PRESIDIO", "DISSONANCE", "CLERESTORY", "HELIX", "FACILITY", "STACKS", "ALTAR", "PUMP" };
+        private static readonly string[] holdNamesInstitution = ["HUB", "LIBRARY", "GARDEN", "ATRIUM", "LOBBY", "HEDRONS", "TURBINE", "HYDRO", "SPILLWAY", "RODS", "STORAGE", "APRROACH", "CROSSOVER", "PIPEWORKS", "VOID", "CONCOURSE", "BUNKER", "INCLINATOR", "ABYSS", "SUBSTATION"];
+        private static readonly string[] supplyNamesInstitution = ["ARRAY", "STUDIO", "SUITE", "LOFT", "PENTHOUSE", "GREENWALL", "FENESTRA", "JUDGEMENT", "PRESIDIO", "DISSONANCE", "CLERESTORY", "HELIX", "FACILITY", "STACKS", "ALTAR", "PUMP"];
         private static bool isInitialized = false;
 
         [HarmonyPrefix]
@@ -65,6 +65,7 @@ namespace H3Status.Patches
             levelEventJSON["type"] = "TNHLevelEvent";
             var levelJSON = levelEventJSON["status"].AsObject;
             levelJSON["seed"] = __instance.m_holdSequenceSeed;
+            levelJSON["equipmentSeed"] = __instance.equipmentSeed;
             levelJSON["levelName"] = __instance.LevelName;
             levelJSON["characterName"] = __instance.C.DisplayName;
             levelJSON["scoreMultiplier"] = TNHScoreHandler.GetMultiplier();
@@ -91,7 +92,7 @@ namespace H3Status.Patches
             phaseJSON["seed"] = __instance.m_holdSequenceSeed;
             phaseJSON["hold"] = __instance.m_curHoldIndex;
             var supplyPointsJSON = phaseJSON["supply"].AsArray;
-            foreach(int i in __instance.m_activeSupplyPointIndicies)
+            foreach (int i in __instance.m_activeSupplyPointIndicies)
             {
                 supplyPointsJSON.Add(i);
             }
@@ -100,7 +101,7 @@ namespace H3Status.Patches
             {
                 phaseJSON["holdName"] = holdNamesInstitution[__instance.m_curHoldIndex];
                 var supplyPointNamesJSON = phaseJSON["supplyNames"].AsArray;
-                foreach(int i in __instance.m_activeSupplyPointIndicies)
+                foreach (int i in __instance.m_activeSupplyPointIndicies)
                 {
                     supplyPointNamesJSON.Add(supplyNamesInstitution[i]);
                 }
@@ -133,7 +134,23 @@ namespace H3Status.Patches
     [HarmonyPatch]
     internal static class TNHScoreHandler
     {
-        private static int[] eventMultiplier = { 5000, 5, 1000, 1000, 50, 100, 50, 50, 50, 50, 25, 500, 1000, 50, 500 };
+        private static readonly int[] eventMultiplier = [
+            10000, // HoldPhaseComplete
+            10,    // HoldDecisecondsRemaining
+            1,
+            10,   // HoldPhaseHealthBonus
+            100,  // KillBonus
+            200,  // HeadShotBonus
+            100,  // MeleeKillBonus
+            100,  // JointBreakBonus
+            100,  // JointSeverBonus
+            1,
+            250,  // KillStreakBonus
+            10,   // TakePhaseHealthBonus
+            1,
+            1,
+            250    // TakeGuardClearSpeedBonus
+        ];
 
         private static int GetEventScore(TNH_Manager.ScoringEvent ev, int num)
         {
@@ -237,56 +254,6 @@ namespace H3Status.Patches
             tokenJSON["tokens"] = __instance.m_numTokens;
 
             Server.ServerBehavior.SendMessage(tokenEventJSON);
-        }
-
-        [HarmonyPrefix]
-        [HarmonyPatch(typeof(TNH_Manager), nameof(TNH_Manager.OnSosigAlert))]
-        private static void TNHLostStealthBonusTake(TNH_Manager __instance)
-        {
-            if (__instance.Phase != TNH_Phase.Take) return;
-            if (__instance.m_alertedThisPhaseFlag) return;
-
-            var bonusEventJSON = new JSONObject();
-            bonusEventJSON["type"] = "TNHLostStealthBonus";
-            Server.ServerBehavior.SendMessage(bonusEventJSON);
-        }
-
-        [HarmonyPrefix]
-        [HarmonyPatch(typeof(TNH_Manager), nameof(TNH_Manager.OnSosigKill))]
-        private static void TNHLostStealthBonusHold(Sosig s, TNH_Manager __instance)
-        {
-            if (__instance.m_hasGuardBeenKilledThatWasAltered) return;
-
-            if (s.GetDiedFromIFF() == GM.CurrentPlayerBody.GetPlayerIFF() &&
-                __instance.Phase == TNH_Phase.Take && s.HasEverBeenAlerted() &&
-                __instance.m_holdPointGuards.Contains(s))
-            {
-                var bonusEventJSON = new JSONObject();
-                bonusEventJSON["type"] = "TNHLostStealthBonus";
-                Server.ServerBehavior.SendMessage(bonusEventJSON);
-            }
-        }
-
-        [HarmonyPrefix]
-        [HarmonyPatch(typeof(TNH_Manager), nameof(TNH_Manager.PlayerTookDamage))]
-        private static void TNHLostNoHitBonusPhase(TNH_Manager __instance)
-        {
-            if (__instance.m_tookDamageThisPhaseFlag) return;
-
-            var bonusEventJSON = new JSONObject();
-            bonusEventJSON["type"] = "TNHLostNoHitBonus";
-            Server.ServerBehavior.SendMessage(bonusEventJSON);
-        }
-
-        [HarmonyPrefix]
-        [HarmonyPatch(typeof(TNH_HoldPoint), nameof(TNH_HoldPoint.PlayerTookDamage))]
-        private static void TNHLostNoHitBonusHold(TNH_HoldPoint __instance)
-        {
-            if (__instance.m_hasBeenDamagedThisPhase && __instance.m_hasBeenDamagedThisHold) return;
-
-            var bonusEventJSON = new JSONObject();
-            bonusEventJSON["type"] = "TNHLostNoHitBonus";
-            Server.ServerBehavior.SendMessage(bonusEventJSON);
         }
     }
 
@@ -510,8 +477,8 @@ namespace H3Status.Patches
         }
 
         [HarmonyPostfix]
-        [HarmonyPatch(typeof(FVRFireArmMagazine), nameof(FVRFireArmMagazine.AddRound), new[] {typeof(FireArmRoundClass), typeof(bool), typeof(bool)})]
-        [HarmonyPatch(typeof(FVRFireArmMagazine), nameof(FVRFireArmMagazine.AddRound), new[] {typeof(FVRFireArmRound), typeof(bool), typeof(bool), typeof(bool)})]
+        [HarmonyPatch(typeof(FVRFireArmMagazine), nameof(FVRFireArmMagazine.AddRound), new[] { typeof(FireArmRoundClass), typeof(bool), typeof(bool) })]
+        [HarmonyPatch(typeof(FVRFireArmMagazine), nameof(FVRFireArmMagazine.AddRound), new[] { typeof(FVRFireArmRound), typeof(bool), typeof(bool), typeof(bool) })]
         // [HarmonyPatch(typeof(FVRFireArmMagazine), nameof(FVRFireArmMagazine.UpdateBulletDisplay))]
         private static void AmmoEventMagazine(FVRFireArmMagazine __instance)
         {

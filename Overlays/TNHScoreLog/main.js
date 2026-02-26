@@ -51,12 +51,6 @@ function onMessage(e) {
     case "TNHHoldPhaseEvent":
       handleHoldPhaseEvent(event.status);
       break;
-    case "TNHLostStealthBonus":
-      eventLog.addItem("STEALTH BONUS LOST", "#f46");
-      break;
-    case "TNHLostNoHitBonus":
-      eventLog.addItem("NO HIT BONUS LOST", "#f46");
-      break;
     case "healthEvent":
       if (event.status.health <= 0) healthBar.setHealth(0);
       else healthBar.setHealth(event.status.health / event.status.maxHealth);
@@ -81,7 +75,7 @@ function compareVersions(a, b) {
 }
 
 function handlePluginVersion(event) {
-  const minSupportedVersion = "0.2.0";
+  const minSupportedVersion = "0.4.0";
   if (compareVersions(event.version, minSupportedVersion) < 0) {
     console.error(
       "Unsupported mod version detected, please update H3Status\n",
@@ -329,33 +323,24 @@ function getEventString(event) {
     case "HoldPhaseComplete":
       return "HOLD COMPLETED";
     case "HoldDecisecondsRemaining":
-      return `TIME BONUS (${Math.floor(event.value / 10 / 5)}s)`;
-    case "HoldWaveCompleteNoDamage":
-      return "HITLESS WAVE";
-    case "HoldPhaseCompleteNoDamage":
-      return "HITLESS HOLD";
-    case "HoldKill":
+      return `TIME BONUS (${120 - Math.floor(event.value / 10 / 10)}s)`;
+    case "KillBonus":
       return "KILL";
-    case "HoldHeadshotKill":
+    case "HeadShotBonus":
       return "HEADSHOT";
-    case "HoldMeleeKill":
+    case "MeleeKillBonus":
       return "MELEE";
-    case "HoldJointBreak":
+    case "JointBreakBonus":
       return "NECK SNAP";
-    case "HoldJointSever":
+    case "JointSeverBonus":
       return "RIP & TEAR";
-    case "HoldKillDistanceBonus":
-      return `LONG SHOT (${25 * Math.round(event.value / 50)}m)`;
-    case "HoldKillStreakBonus":
-      // return `KILL STREAK (${Math.floor(event.value / 25)})`;
+    case "KillStreakBonus":
       return "MULTIKILL";
-    case "TakeCompleteNoDamage":
-      return "HITLESS TAKE";
-    case "TakeCompleteNoAlert":
-    case "TakeHoldPointTakenClean":
-      return "NO ALERT";
-    case "TakeKillGuardUnaware":
-      return "STEALTH KILL";
+    case "HoldPhaseHealthBonus":
+    case "TakePhaseHealthBonus":
+      return `HEALTH BONUS (${Math.round(event.value / 10)}%)`;
+    case "TakeGuardClearSpeedBonus":
+      return `GUARDS WIPED (${20 - math.round(event.value / 250)}s)`;
     default:
       console.log(event);
       return "UNKNOWN";

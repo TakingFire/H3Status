@@ -156,8 +156,8 @@ class Countdown {
 
     const progress = this.value / this.duration;
     const clock = this.duration - this.value;
-    const score = this.value * 50 * scoreMultiplier;
-    const scoreLost = 6000 * scoreMultiplier - score;
+    const score = this.value * 10 * 10 * scoreMultiplier;
+    const scoreLost = 12000 * scoreMultiplier - score;
 
     if (this.value <= 60) timerBar.setColor("#f44");
     timerBar.setValue((progress % 0.5) * 2);
