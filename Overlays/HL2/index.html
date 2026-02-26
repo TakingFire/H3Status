@@ -1,0 +1,52 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <link rel="stylesheet" href="style.css" />
+    <script type="text/javascript" src="config.js"></script>
+    <script defer type="text/javascript" src="main.js"></script>
+  </head>
+
+  <body>
+    <div id="overlay">
+      <div class="row left">
+        <div class="col">
+          <div class="panel" id="aux">
+            <span>AUX POWER</span>
+            <div id="aux-mask">
+              <div id="aux-fg"></div>
+              <div id="aux-bg"></div>
+            </div>
+          </div>
+          <div class="panel" id="health-panel">
+            <span>HEALTH</span>
+            <span id="health" class="num" data-text="100">100</span>
+          </div>
+        </div>
+        <div class="col">
+          <div class="panel red" id="status">
+            <span>DISCONNECTED</span>
+          </div>
+          <div class="panel">
+            <span>SUIT</span>
+            <span id="suit" class="num" data-text="0">0</span>
+          </div>
+        </div>
+        <div class="panel" style="display: none">
+          <span id="flashlight" class="icon">®</span>
+        </div>
+      </div>
+      <div class="row right">
+        <div class="panel" id="ammo-panel">
+          <div class="text-col">
+            <span id="ammo-icon" class="icon">r</span>
+            <span>AMMO</span>
+          </div>
+          <span id="ammo" class="num" data-text="0">0</span>
+          <span id="ammo-cap" class="num" data-text="0">0</span>
+        </div>
+      </div>
+      <!--<span id="crosshair">Q</span>-->
+    </div>
+  </body>
+</html>
