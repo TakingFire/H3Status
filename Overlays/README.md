@@ -28,7 +28,7 @@ Download: [DownGit](https://downgit.github.io/#/home?url=https://github.com/Taki
 
 Become Welldone Freemeat with a familiar looking HUD. Tracks health, ammo, and token count.
 
-> ![Preview Image](https://github.com/user-attachments/assets/30df6d38-ca63-4bfe-8ed7-1a2b627e22fc)
+> <img src="https://github.com/user-attachments/assets/30df6d38-ca63-4bfe-8ed7-1a2b627e22fc" alt="Preview Image" width="480"/>
 
 **Direct URL:** *Coming Soon*\
 Download: [DownGit](https://downgit.github.io/#/home?url=https://github.com/TakingFire/H3Status/tree/main/Overlays/HL2)
