@@ -10,6 +10,7 @@ function connect() {
   return ws;
 }
 
+const pointsPerSecond = 10 * 10;
 let scoreMultiplier = 10;
 let encryptionType;
 let encryptionCount;
@@ -64,7 +65,10 @@ function onMessage(e) {
           `icons/${encryptionType}.webp`;
 
         clockText.setValue(0, 500);
-        scoreText.setValue(countdown.duration * 50 * scoreMultiplier, 500);
+        scoreText.setValue(
+          countdown.duration * pointsPerSecond * scoreMultiplier,
+          500,
+        );
         scoreLostText.setValue(0, 500);
 
         showOverlay();
@@ -156,7 +160,7 @@ class Countdown {
 
     const progress = this.value / this.duration;
     const clock = this.duration - this.value;
-    const score = this.value * 10 * 10 * scoreMultiplier;
+    const score = this.value * pointsPerSecond * scoreMultiplier;
     const scoreLost = 12000 * scoreMultiplier - score;
 
     if (this.value <= 60) timerBar.setColor("#f44");

@@ -149,7 +149,7 @@ namespace H3Status.Patches
             10,   // TakePhaseHealthBonus
             1,
             1,
-            250    // TakeGuardClearSpeedBonus
+            250   // TakeGuardClearSpeedBonus
         ];
 
         private static int GetEventScore(TNH_Manager.ScoringEvent ev, int num)
