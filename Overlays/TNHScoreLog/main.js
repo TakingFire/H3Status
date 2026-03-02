@@ -340,7 +340,7 @@ function getEventString(event) {
     case "TakePhaseHealthBonus":
       return `HEALTH BONUS (${Math.round(event.value / 10)}%)`;
     case "TakeGuardClearSpeedBonus":
-      return `GUARDS WIPED (${20 - math.round(event.value / 250)}s)`;
+      return `GUARDS WIPED (${20 - Math.round(event.value / 250)}s)`;
     default:
       console.log(event);
       return "UNKNOWN";
