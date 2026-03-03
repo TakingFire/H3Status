@@ -20,6 +20,7 @@ public class Plugin : BaseUnityPlugin
     public static HttpServer server;
     public static int port = 9504;
 
+#pragma warning disable IDE0051
     private void Awake()
     {
         Logger = base.Logger;

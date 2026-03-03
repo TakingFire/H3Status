@@ -2,15 +2,16 @@ using HarmonyLib;
 using SimpleJSON;
 using FistVR;
 
+#pragma warning disable Harmony003
 namespace H3Status.Patches
 {
 
     internal static class VersionHandler
     {
+        private static readonly JSONObject versionJSON = new();
+
         public static JSONObject GetVersionInfo()
         {
-            var versionJSON = new JSONObject();
-
             versionJSON["version"] = Plugin.Version;
             versionJSON["gameVersion"] = $"{GM.Version_UpdateNumber}.{GM.Version_AlphaNumber}.{GM.Version_PatchNumber}";
 
@@ -23,13 +24,13 @@ namespace H3Status.Patches
     {
         public static string activeScene = string.Empty;
 
+        private static readonly JSONObject sceneEventJSON = new();
+
         [HarmonyPostfix]
         [HarmonyPatch(typeof(SteamVR_LoadLevel), nameof(SteamVR_LoadLevel.Begin))]
         private static void SceneEvent(string levelName)
         {
             activeScene = levelName;
-
-            var sceneEventJSON = new JSONObject();
 
             sceneEventJSON["type"] = "sceneEvent";
             var sceneJSON = sceneEventJSON["status"].AsObject;
@@ -46,6 +47,10 @@ namespace H3Status.Patches
         private static readonly string[] supplyNamesInstitution = ["ARRAY", "STUDIO", "SUITE", "LOFT", "PENTHOUSE", "GREENWALL", "FENESTRA", "JUDGEMENT", "PRESIDIO", "DISSONANCE", "CLERESTORY", "HELIX", "FACILITY", "STACKS", "ALTAR", "PUMP"];
         private static bool isInitialized = false;
 
+        private static readonly JSONObject levelEventJSON = new();
+        private static readonly JSONObject phaseEventJSON = new();
+        private static readonly JSONObject holdPhaseEventJSON = new();
+
         [HarmonyPrefix]
         [HarmonyPatch(typeof(TNH_Manager), nameof(TNH_Manager.DelayedInit))]
         private static void TNHLevelEventPre(TNH_Manager __instance)
@@ -59,8 +64,6 @@ namespace H3Status.Patches
         {
             bool becameInitialized = !isInitialized && __instance.m_hasInit;
             if (!becameInitialized) return;
-
-            var levelEventJSON = new JSONObject();
 
             levelEventJSON["type"] = "TNHLevelEvent";
             var levelJSON = levelEventJSON["status"].AsObject;
@@ -82,8 +85,6 @@ namespace H3Status.Patches
         [HarmonyPatch(typeof(TNH_Manager), nameof(TNH_Manager.SetPhase))]
         private static void TNHPhaseEvent(TNH_Phase p, TNH_Manager __instance)
         {
-            var phaseEventJSON = new JSONObject();
-
             phaseEventJSON["type"] = "TNHPhaseEvent";
             var phaseJSON = phaseEventJSON["status"].AsObject;
             phaseJSON["phase"] = p.ToString();
@@ -106,6 +107,11 @@ namespace H3Status.Patches
                     supplyPointNamesJSON.Add(supplyNamesInstitution[i]);
                 }
             }
+            else
+            {
+                phaseJSON.Remove("holdName");
+                phaseJSON.Remove("supplyNames");
+            }
 
             Server.ServerBehavior.SendMessage(phaseEventJSON);
         }
@@ -116,10 +122,8 @@ namespace H3Status.Patches
         [HarmonyPatch(typeof(TNH_HoldPoint), nameof(TNH_HoldPoint.CompletePhase))]
         private static void TNHHoldPhaseEvent(TNH_HoldPoint __instance)
         {
-            var phaseEventJSON = new JSONObject();
-
-            phaseEventJSON["type"] = "TNHHoldPhaseEvent";
-            var phaseJSON = phaseEventJSON["status"].AsObject;
+            holdPhaseEventJSON["type"] = "TNHHoldPhaseEvent";
+            var phaseJSON = holdPhaseEventJSON["status"].AsObject;
             phaseJSON["phase"] = __instance.m_state.ToString();
             phaseJSON["level"] = __instance.m_phaseIndex;
             phaseJSON["count"] = __instance.H.Phases.Count;
@@ -127,13 +131,17 @@ namespace H3Status.Patches
             phaseJSON["encryptionCount"] = __instance.m_numTargsToSpawn;
             phaseJSON["encryptionTime"] = 120f;
 
-            Server.ServerBehavior.SendMessage(phaseEventJSON);
+            Server.ServerBehavior.SendMessage(holdPhaseEventJSON);
         }
     }
 
     [HarmonyPatch]
     internal static class TNHScoreHandler
     {
+        private static readonly JSONObject scoreEventJSON = new();
+        private static readonly JSONObject encryptionEventJSON = new();
+        private static readonly JSONObject tokenEventJSON = new();
+
         private static readonly int[] eventMultiplier = [
             10000, // HoldPhaseComplete
             10,    // HoldDecisecondsRemaining
@@ -202,12 +210,7 @@ namespace H3Status.Patches
         [HarmonyPatch(typeof(TNH_Manager), nameof(TNH_Manager.IncrementScoringStat))]
         private static void TNHScoreEvent(TNH_Manager.ScoringEvent ev, int num, TNH_Manager __instance)
         {
-            int baseScore = __instance.ReturnSummedBaseScore();
-
             Plugin.Logger.LogInfo($"{ev}: {GetEventScore(ev, num) * GetMultiplier()} ({GetEventScore(ev, num)}x{GetMultiplier()})");
-            // Plugin.Logger.LogInfo(GetTotalScore());
-
-            var scoreEventJSON = new JSONObject();
 
             scoreEventJSON["type"] = "TNHScoreEvent";
             var scoreJSON = scoreEventJSON["status"].AsObject;
@@ -223,7 +226,6 @@ namespace H3Status.Patches
         [HarmonyPatch(typeof(TNH_HoldPoint), nameof(TNH_HoldPoint.TargetDestroyed))]
         private static void TNHEncryptionDestroyed()
         {
-            var encryptionEventJSON = new JSONObject();
             encryptionEventJSON["type"] = "TNHEncryptionDestroyed";
             Server.ServerBehavior.SendMessage(encryptionEventJSON);
         }
@@ -232,8 +234,6 @@ namespace H3Status.Patches
         [HarmonyPatch(typeof(TNH_Manager), nameof(TNH_Manager.AddTokens))]
         private static void TNHTokenEventAdd(int i, TNH_Manager __instance)
         {
-            var tokenEventJSON = new JSONObject();
-
             tokenEventJSON["type"] = "TNHTokenEvent";
             var tokenJSON = tokenEventJSON["status"].AsObject;
             tokenJSON["change"] = i;
@@ -246,8 +246,6 @@ namespace H3Status.Patches
         [HarmonyPatch(typeof(TNH_Manager), nameof(TNH_Manager.SubtractTokens))]
         private static void TNHTokenEventSubtract(int i, TNH_Manager __instance)
         {
-            var tokenEventJSON = new JSONObject();
-
             tokenEventJSON["type"] = "TNHTokenEvent";
             var tokenJSON = tokenEventJSON["status"].AsObject;
             tokenJSON["change"] = -i;
@@ -260,12 +258,13 @@ namespace H3Status.Patches
     [HarmonyPatch]
     internal static class PlayerHealthHandler
     {
+        private static readonly JSONObject healthEventJSON = new();
+        private static readonly JSONObject buffEventJSON = new();
+
         [HarmonyPostfix]
         [HarmonyPatch(typeof(FVRPlayerBody), nameof(FVRPlayerBody.RegisterPlayerHit))]
         private static void HealthEventHit(float DamagePoints, bool FromSelf, int iff, FVRPlayerBody __instance)
         {
-            var healthEventJSON = new JSONObject();
-
             healthEventJSON["type"] = "healthEvent";
             var healthJSON = healthEventJSON["status"].AsObject;
             healthJSON["change"] = -(int)DamagePoints;
@@ -279,8 +278,6 @@ namespace H3Status.Patches
         [HarmonyPatch(typeof(FVRPlayerBody), nameof(FVRPlayerBody.HarmPercent))]
         private static void HealthEventHarm(float f, FVRPlayerBody __instance)
         {
-            var healthEventJSON = new JSONObject();
-
             healthEventJSON["type"] = "healthEvent";
             var healthJSON = healthEventJSON["status"].AsObject;
             healthJSON["change"] = -(int)(__instance.m_startingHealth * f);
@@ -294,8 +291,6 @@ namespace H3Status.Patches
         [HarmonyPatch(typeof(FVRPlayerBody), nameof(FVRPlayerBody.Init))]
         private static void HealthEventInit(FVRPlayerBody __instance)
         {
-            var healthEventJSON = new JSONObject();
-
             healthEventJSON["type"] = "healthEvent";
             var healthJSON = healthEventJSON["status"].AsObject;
             healthJSON["change"] = 0;
@@ -309,8 +304,6 @@ namespace H3Status.Patches
         [HarmonyPatch(typeof(FVRPlayerBody), nameof(FVRPlayerBody.SetHealthThreshold))]
         private static void HealthEventUpdate(float h, FVRPlayerBody __instance)
         {
-            var healthEventJSON = new JSONObject();
-
             healthEventJSON["type"] = "healthEvent";
             var healthJSON = healthEventJSON["status"].AsObject;
             healthJSON["change"] = (int)(h - __instance.Health);
@@ -324,8 +317,6 @@ namespace H3Status.Patches
         [HarmonyPatch(typeof(FVRPlayerBody), nameof(FVRPlayerBody.HealPercent))]
         private static void HealthEventHeal(float f, FVRPlayerBody __instance)
         {
-            var healthEventJSON = new JSONObject();
-
             healthEventJSON["type"] = "healthEvent";
             var healthJSON = healthEventJSON["status"].AsObject;
             healthJSON["change"] = (int)(__instance.m_startingHealth * f);
@@ -365,15 +356,13 @@ namespace H3Status.Patches
                 duration = DurationOverride;
             }
 
-            var powerEventJSON = new JSONObject();
+            buffEventJSON["type"] = "buffEvent";
+            var buffJSON = buffEventJSON["status"].AsObject;
+            buffJSON["type"] = type.ToString();
+            buffJSON["duration"] = duration;
+            buffJSON["inverted"] = isInverted;
 
-            powerEventJSON["type"] = "buffEvent";
-            var powerJSON = powerEventJSON["status"].AsObject;
-            powerJSON["type"] = type.ToString();
-            powerJSON["duration"] = duration;
-            powerJSON["inverted"] = isInverted;
-
-            Server.ServerBehavior.SendMessage(powerEventJSON);
+            Server.ServerBehavior.SendMessage(buffEventJSON);
         }
     }
 
@@ -381,7 +370,7 @@ namespace H3Status.Patches
     internal static class WeaponAmmoHandler
     {
         private static bool isUpdatePending = false;
-        private static JSONObject ammoEventJSON = new JSONObject();
+        private static readonly JSONObject ammoEventJSON = new();
 
         [HarmonyPrefix]
         [HarmonyPatch(typeof(FVRFireArm), nameof(FVRFireArm.FVRFixedUpdate))]
@@ -477,8 +466,8 @@ namespace H3Status.Patches
         }
 
         [HarmonyPostfix]
-        [HarmonyPatch(typeof(FVRFireArmMagazine), nameof(FVRFireArmMagazine.AddRound), new[] { typeof(FireArmRoundClass), typeof(bool), typeof(bool) })]
-        [HarmonyPatch(typeof(FVRFireArmMagazine), nameof(FVRFireArmMagazine.AddRound), new[] { typeof(FVRFireArmRound), typeof(bool), typeof(bool), typeof(bool) })]
+        [HarmonyPatch(typeof(FVRFireArmMagazine), nameof(FVRFireArmMagazine.AddRound), [typeof(FireArmRoundClass), typeof(bool), typeof(bool)])]
+        [HarmonyPatch(typeof(FVRFireArmMagazine), nameof(FVRFireArmMagazine.AddRound), [typeof(FVRFireArmRound), typeof(bool), typeof(bool), typeof(bool)])]
         // [HarmonyPatch(typeof(FVRFireArmMagazine), nameof(FVRFireArmMagazine.UpdateBulletDisplay))]
         private static void AmmoEventMagazine(FVRFireArmMagazine __instance)
         {
@@ -509,10 +498,6 @@ namespace H3Status.Patches
                 if (fireArm != null)
                 {
                     UpdateAmmoCount(fireArm);
-                }
-                else
-                {
-                    Plugin.Logger.LogError("Can't get chamber fireArm");
                 }
             }
         }
