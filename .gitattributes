@@ -1,1 +1,4 @@
-H3Status/Fleck2/** linguist-vendored
+H3Status/Fleck2/** linguist-generated
+# Previous dependencies
+H3Status/websocket-sharp/** linguist-generated
+H3Status/SimpleJSON.cs linguist-generated
