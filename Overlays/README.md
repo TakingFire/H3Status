@@ -19,7 +19,12 @@ Download: [DownGit](https://downgit.github.io/#/home?url=https://github.com/Taki
 A Take and Hold focused overlay that tracks time and score while clearing encryption nodes.\
 Automatically hides itself when not in use.
 
-> ![Preview Image](https://github.com/user-attachments/assets/90e101f0-3440-4cb4-a94b-e01626025383)
+<table>
+   <tr>
+      <td><img width="271" src="https://github.com/user-attachments/assets/90e101f0-3440-4cb4-a94b-e01626025383" alt="Preview Image"/></td>
+      <td><img width="200" src="https://github.com/user-attachments/assets/1f94e83e-937c-4ebc-b8b5-0e833ab14527"  alt="Preview GIF"/></td>
+   </tr>
+</table>
 
 **Direct URL: [encryption.overlays.bacur.xyz](https://encryption.overlays.bacur.xyz)**\
 Download: [DownGit](https://downgit.github.io/#/home?url=https://github.com/TakingFire/H3Status/tree/main/Overlays/TNHEncryptionTimer)
@@ -28,7 +33,12 @@ Download: [DownGit](https://downgit.github.io/#/home?url=https://github.com/Taki
 
 Become Welldone Freemeat with a familiar looking HUD. Tracks health, ammo, and token count.
 
-> <img src="https://github.com/user-attachments/assets/30df6d38-ca63-4bfe-8ed7-1a2b627e22fc" alt="Preview Image" width="480"/>
+<table>
+   <tr>
+      <td><img width="480" src="https://github.com/user-attachments/assets/30df6d38-ca63-4bfe-8ed7-1a2b627e22fc" alt="Preview Image"/></td>
+      <td><img width="300" src="https://github.com/user-attachments/assets/fe6218dc-621a-4fa5-b7ef-6baf28edff5a" alt="Preview GIF"/></td>
+   </tr>
+</table>
 
 **Direct URL:** *Coming Soon*\
 Download: [DownGit](https://downgit.github.io/#/home?url=https://github.com/TakingFire/H3Status/tree/main/Overlays/HL2)
