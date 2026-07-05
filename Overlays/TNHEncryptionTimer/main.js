@@ -36,10 +36,12 @@ function onMessage(e) {
       hideOverlay();
       break;
 
+    case "tnhLevelEvent":
     case "TNHLevelEvent":
       scoreMultiplier = event.status.scoreMultiplier;
       break;
 
+    case "tnhEncryptionDestroyed":
     case "TNHEncryptionDestroyed":
       // Cascading turns into multiple full encryptions,
       // so the counter would go into the negatives here
@@ -54,6 +56,7 @@ function onMessage(e) {
       drawTickMark();
       break;
 
+    case "tnhHoldPhaseEvent":
     case "TNHHoldPhaseEvent":
       if (event.status.phase == "Analyzing") {
         encryptionType = event.status.encryptionType;
@@ -87,6 +90,7 @@ function onMessage(e) {
       }
       break;
 
+    case "tnhPhaseEvent":
     case "TNHPhaseEvent":
       if (event.status.phase == "Take" || event.status.phase == "Completed") {
         hideOverlay();

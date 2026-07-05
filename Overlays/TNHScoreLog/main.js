@@ -39,15 +39,19 @@ function onMessage(e) {
     case "sceneEvent":
       handleSceneEvent(event.status);
       return;
+    case "tnhScoreEvent":
     case "TNHScoreEvent":
       handleScoreEvent(event.status);
       break;
+    case "tnhTokenEvent":
     case "TNHTokenEvent":
       handleTokenEvent(event.status);
       break;
+    case "tnhPhaseEvent":
     case "TNHPhaseEvent":
       handlePhaseEvent(event.status);
       break;
+    case "tnhHoldPhaseEvent":
     case "TNHHoldPhaseEvent":
       handleHoldPhaseEvent(event.status);
       break;
@@ -62,7 +66,7 @@ function onMessage(e) {
       handleAmmoEvent(event.status);
       break;
     default:
-      console.log(event);
+      // console.log(event);
       break;
   }
 }

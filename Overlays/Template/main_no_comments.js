@@ -19,7 +19,7 @@ ws.onmessage = function (msg) {
   const event = JSON.parse(msg.data);
 
   switch (event.type) {
-    case "TNHScoreEvent":
+    case "tnhScoreEvent":
       setScore(event.status);
       break;
     case "playerDamage":

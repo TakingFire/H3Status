@@ -34,6 +34,7 @@ function onMessage(e) {
     case "healthEvent":
       handleHealthEvent(event.status);
       break;
+    case "tnhTokenEvent":
     case "TNHTokenEvent":
       handleTokenEvent(event.status);
       break;
