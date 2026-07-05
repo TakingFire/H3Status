@@ -40,7 +40,7 @@ Become Welldone Freemeat with a familiar looking HUD. Tracks health, ammo, and t
    </tr>
 </table>
 
-**Direct URL:** *Coming Soon*\
+**Direct URL: [hl2.overlays.bacur.xyz](https://hl2.overlays.bacur.xyz)**\
 Download: [DownGit](https://downgit.github.io/#/home?url=https://github.com/TakingFire/H3Status/tree/main/Overlays/HL2)
 
 ### [TNH Score Breakdown](https://github.com/quilavad/TNHScoreBreakdown) by [Quilavad](https://github.com/quilavad)

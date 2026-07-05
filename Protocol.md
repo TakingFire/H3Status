@@ -1,4 +1,4 @@
-# H3Status 0.4.0 Event Reference
+# H3Status 0.5.0 Event Reference
 
 > ⚠️ **Warning:** This data structure is **under development** and is **subject to change**.
 
