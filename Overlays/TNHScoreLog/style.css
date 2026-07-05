@@ -54,7 +54,7 @@ body {
     display: flex;
     align-items: flex-end;
 
-    /* background-color: #30343f; */
+    background-color: #30343f;
 }
 
 #overlay {

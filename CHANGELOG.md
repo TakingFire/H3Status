@@ -1,3 +1,24 @@
+### H3Status 0.4.0
++ Added a [New Overlay](https://github.com/TakingFire/H3Status/tree/main/Overlays#hl2-theme) with a familiar theme
++ Added `equipmentSeed` to `TNHLevelEvent`
+- **[Breaking]** Removed `TNHLostStealthBonus` and `TNHLostNoHitBonus`
+  - These are no longer used in the new scoring system
+* **[Breaking]** Made the following changes to `TNHScoreEvent`:
+  + Added `HoldPhaseHealthBonus`
+  + Added `TakePhaseHealthBonus`
+  + Added `TakeGuardClearSpeedBonus`
+  - Removed `HoldWaveCompleteNoDamage`
+  - Removed `HoldPhaseCompleteNoDamage`
+  - Removed `TakeCompleteNoDamage`
+  - Removed `TakeCompleteNoAlert`
+  - Removed `HoldKillDistanceBonus`
+  * Renamed `HoldKill` to `KillBonus`
+  * Renamed `HoldHeadshotKill` to `HeadShotBonus`
+  * Renamed `HoldMeleeKill` to `MeleeKillBonus`
+  * Renamed `HoldJointBreak` to `JointBreakBonus`
+  * Renamed `HoldJointSever` to `JointSeverBonus`
+  * Renamed `HoldKillStreakBonus` to `KillStreakBonus`
+
 ### H3Status 0.3.0
 + Added a [New Overlay](https://github.com/TakingFire/H3Status/tree/main/Overlays#tnh-encryption-timer) for timing encryption clears
 + Added `TNHEncryptionDestroyed`

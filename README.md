@@ -21,5 +21,4 @@ If you have made an overlay using this plugin and would like to share it, it wil
 
 ## Credits
 
-**Sta:** [websocket-sharp](https://github.com/sta/websocket-sharp)\
-**Bunny83:** [SimpleJSON](https://github.com/Bunny83/SimpleJSON)
+**statianzo** & **peters**: [Fleck2](https://github.com/peters/Fleck2)

@@ -1,4 +1,4 @@
-# H3Status 0.3.0 Event Reference
+# H3Status 0.4.0 Event Reference
 
 > ⚠️ **Warning:** This data structure is **under development** and is **subject to change**.
 
@@ -34,13 +34,12 @@ Type | Status | Description
 `"ammoEvent"` | [AmmoStatus](Protocol.md#ammostatus-object) | Sent when the ammunition in a weapon changes.
 `"healthEvent"` | [HealthStatus](Protocol.md#healthstatus-object) | Sent when the player health changes.
 `"buffEvent"` | [BuffStatus](Protocol.md#buffstatus-object) | Sent when the player uses a powerup.
-`"TNHLevelEvent"` | [TNHLevelStatus](Protocol.md#tnhlevelstatus-object) | Sent when a T&H run begins.
-`"TNHPhaseEvent"` | [TNHPhaseStatus](Protocol.md#tnhphasestatus-object) | Sent on phase change in T&H, e.g. Take, Hold, and Complete.
-`"TNHHoldPhaseEvent"` | [TNHHoldPhaseStatus](Protocol.md#tnhholdphasestatus-object) | Sent on Hold phase change in T&H, e.g. Analyzing and Hacking.
-`"TNHLostStealthBonus"`<br>`"TNHLostNoHitBonus"` | | Sent when a point bonus is lost in T&H.
-`"TNHScoreEvent"` | [TNHScoreStatus](Protocol.md#tnhscorestatus-object) | Sent when the score changes in T&H.
-`"TNHEncryptionDestroyed"` | | Sent when an encryption target is destroyed.
-`"TNHTokenEvent"` | [TNHTokenStatus](Protocol.md#tnhtokenstatus-object) | Sent when the override token count changes in T&H.
+`"tnhLevelEvent"` | [TNHLevelStatus](Protocol.md#tnhlevelstatus-object) | Sent when a T&H run begins.
+`"tnhPhaseEvent"` | [TNHPhaseStatus](Protocol.md#tnhphasestatus-object) | Sent on phase change in T&H, e.g. Take, Hold, and Complete.
+`"tnhHoldPhaseEvent"` | [TNHHoldPhaseStatus](Protocol.md#tnhholdphasestatus-object) | Sent on Hold phase change in T&H, e.g. Analyzing and Hacking.
+`"tnhScoreEvent"` | [TNHScoreStatus](Protocol.md#tnhscorestatus-object) | Sent when the score changes in T&H.
+`"tnhEncryptionDestroyed"` | | Sent when an encryption target is destroyed.
+`"tnhTokenEvent"` | [TNHTokenStatus](Protocol.md#tnhtokenstatus-object) | Sent when the override token count changes in T&H.
 
 ### VersionStatus Object
 
@@ -123,6 +122,7 @@ Type | Status | Description
 ```js
 {
   "seed"           : Number // Chosen seed
+  "equipmentSeed"  : Number // Chosed equipment seed
   "levelName"      : String // Name of the current level
   "characterName"  : String // Name of the current character
   "scoreMultiplier": Number // Total base score multiplier
@@ -148,8 +148,8 @@ Type | Status | Description
   "supply": Number[], // Indices of the current supply points
 
   // INSTITUTION ONLY:
-  "holdName"   : String, // Name of the current Hold
-  "supplyNames": String, // Name of the current supply points
+  "holdName"   : String,   // Name of the current Hold
+  "supplyNames": String[], // Names of the current supply points
 }
 ```
 
@@ -235,19 +235,15 @@ Type | Status | Description
 [
   "HoldPhaseComplete",         // The current Hold was completed
   "HoldDecisecondsRemaining",  // Encryption time remaining in deciseconds
-  "HoldWaveCompleteNoDamage",  // Encryption was cleared with no damage
-  "HoldPhaseCompleteNoDamage", // Hold was cleared with no damage
-  "HoldKill",                  // An enemy died during a Hold
-  "HoldHeadshotKill",          // An enemy died from a hit to the head
-  "HoldMeleeKill",             // An enemy died from a melee weapon
-  "HoldJointBreak",            // An enemy died from joint twisting
-  "HoldJointSever",            // An enemy died from joint pulling
-  "HoldKillDistanceBonus",     // Increases every 25m from the target
-  "HoldKillStreakBonus",       // Two enemies died within one second
-  "TakeCompleteNoDamage",      // Take was completed with no damage
-  "TakeCompleteNoAlert",       // No enemies were alerted during Take
-  "TakeKillGuardUnaware",      // A guard in the Hold room died unalerted
-  "TakeHoldPointTakenClean",   // No alerted guards died during Take
+  "HoldPhaseHealthBonus",      // Decreases with damage taken during Take
+  "KillBonus",                 // An enemy died during a Hold
+  "HeadShotBonus",             // An enemy died from a hit to the head
+  "MeleeKillBonus",            // An enemy died from a melee weapon
+  "JointBreakBonus",           // An enemy died from joint twisting
+  "JointSeverBonus",           // An enemy died from joint pulling
+  "KillStreakBonus",           // Two enemies died within one second
+  "TakePhaseHealthBonus",      // Decreases with damage taken during Hold
+  "TakeGuardClearSpeedBonus",  // Hold guards were cleared quickly
 ]
 ```
 

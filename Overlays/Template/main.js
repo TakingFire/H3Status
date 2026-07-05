@@ -56,7 +56,7 @@ ws.onmessage = function (msg) {
   switch (event.type) {
     // We recieve this event every time
     // the Take and Hold score changes
-    case "TNHScoreEvent":
+    case "tnhScoreEvent":
       setScore(event.status);
       break;
     // These events both contain the

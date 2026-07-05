@@ -1,35 +1,68 @@
 using System.Collections.Generic;
-using WebSocketSharp;
-using WebSocketSharp.Server;
-using SimpleJSON;
+using H3Status.Model;
+using Fleck2;
+using Fleck2.Interfaces;
+using Valve.Newtonsoft.Json;
+using Valve.Newtonsoft.Json.Serialization;
+using Valve.Newtonsoft.Json.Converters;
 
-namespace H3Status.Server
+namespace H3Status
 {
-    public class ServerBehavior : WebSocketBehavior
+    internal static class Server
     {
-        private static List<ServerBehavior> _instances = new List<ServerBehavior>();
-
-        protected override void OnOpen()
+        private static WebSocketServer _server;
+        private static readonly List<IWebSocketConnection> _instances = [];
+        private static readonly JsonSerializerSettings _jsonSettings = new()
         {
-            base.OnOpen();
-            _instances.Add(this);
+            ContractResolver = new CamelCasePropertyNamesContractResolver(),
+            Converters = [new StringEnumConverter(false)]
+        };
 
-            var eventJSON = new JSONObject();
-            eventJSON["type"] = "hello";
-            eventJSON["status"] = Patches.VersionHandler.GetVersionInfo();
+        public static void Start(int port)
+        {
+            if (_server != null) { return; }
+            FleckLog.Level = LogLevel.Warn;
 
-            this.SendAsync(eventJSON.ToString(), null);
+            _server = new WebSocketServer($"ws://0.0.0.0:{port}");
+
+            _server.Start(instance =>
+            {
+                instance.OnOpen = () =>
+                {
+                    _instances.Add(instance);
+
+                    instance.Send(JsonConvert.SerializeObject(new Event
+                    {
+                        Type = EventType.Hello,
+                        Status = Patches.VersionHandler.GetVersionInfo()
+                    }, _jsonSettings));
+                };
+
+                instance.OnClose = () => _instances.Remove(instance);
+            });
+
+            Plugin.Logger.LogInfo($"Server started on port {port}");
         }
 
-        protected override void OnClose(CloseEventArgs e)
+        public static void Stop()
         {
-            _instances.Remove(this);
-            base.OnClose(e);
+            if (_server == null) { return; }
+            Plugin.Logger.LogInfo("Server shutting down");
+
+            foreach (var instance in _instances)
+            {
+                instance.Close();
+            }
+            _server.Dispose();
+            _server = null;
         }
 
-        public static void SendMessage(JSONObject json) {
-            foreach (var instance in _instances) {
-                instance.SendAsync(json.ToString(), null);
+        public static void SendMessage(Event evt)
+        {
+            string json = JsonConvert.SerializeObject(evt, _jsonSettings);
+            foreach (var instance in _instances)
+            {
+                instance.Send(json);
             }
         }
     }

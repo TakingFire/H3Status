@@ -24,6 +24,15 @@ Automatically hides itself when not in use.
 **Direct URL: [encryption.overlays.bacur.xyz](https://encryption.overlays.bacur.xyz)**\
 Download: [DownGit](https://downgit.github.io/#/home?url=https://github.com/TakingFire/H3Status/tree/main/Overlays/TNHEncryptionTimer)
 
+### [HL2 Theme](HL2/)
+
+Become Welldone Freemeat with a familiar looking HUD. Tracks health, ammo, and token count.
+
+> <img src="https://github.com/user-attachments/assets/30df6d38-ca63-4bfe-8ed7-1a2b627e22fc" alt="Preview Image" width="480"/>
+
+**Direct URL:** *Coming Soon*\
+Download: [DownGit](https://downgit.github.io/#/home?url=https://github.com/TakingFire/H3Status/tree/main/Overlays/HL2)
+
 ### [TNH Score Breakdown](https://github.com/quilavad/TNHScoreBreakdown) by [Quilavad](https://github.com/quilavad)
 
 > **Note: Only works when using the downloaded (not URL) version of TNHScoreLog**

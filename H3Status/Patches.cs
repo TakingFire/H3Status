@@ -1,20 +1,19 @@
 using HarmonyLib;
-using SimpleJSON;
+using H3Status.Model;
 using FistVR;
 
 namespace H3Status.Patches
 {
-
     internal static class VersionHandler
     {
-        public static JSONObject GetVersionInfo()
+        private static VersionStatus versionStatus = new();
+
+        public static VersionStatus GetVersionInfo()
         {
-            var versionJSON = new JSONObject();
+            versionStatus.Version = Plugin.Version;
+            versionStatus.GameVersion = $"{GM.Version_UpdateNumber}.{GM.Version_AlphaNumber}.{GM.Version_PatchNumber}";
 
-            versionJSON["version"] = Plugin.Version;
-            versionJSON["gameVersion"] = $"{GM.Version_UpdateNumber}.{GM.Version_AlphaNumber}.{GM.Version_PatchNumber}";
-
-            return versionJSON;
+            return versionStatus;
         }
     }
 
@@ -23,28 +22,39 @@ namespace H3Status.Patches
     {
         public static string activeScene = string.Empty;
 
+        private static SceneStatus sceneStatus = new();
+
         [HarmonyPostfix]
         [HarmonyPatch(typeof(SteamVR_LoadLevel), nameof(SteamVR_LoadLevel.Begin))]
         private static void SceneEvent(string levelName)
         {
+            if (!Config.SceneEvent.Value) { return; }
+
             activeScene = levelName;
 
-            var sceneEventJSON = new JSONObject();
+            sceneStatus = new SceneStatus
+            {
+                Name = levelName
+            };
 
-            sceneEventJSON["type"] = "sceneEvent";
-            var sceneJSON = sceneEventJSON["status"].AsObject;
-            sceneJSON["name"] = levelName;
-
-            Server.ServerBehavior.SendMessage(sceneEventJSON);
+            Server.SendMessage(new Event
+            {
+                Type = EventType.SceneEvent,
+                Status = sceneStatus
+            });
         }
     }
 
     [HarmonyPatch]
     internal static class TNHPhaseHandler
     {
-        private static string[] holdNamesInstitution = {"HUB", "LIBRARY", "GARDEN", "ATRIUM", "LOBBY", "HEDRONS", "TURBINE", "HYDRO", "SPILLWAY", "RODS", "STORAGE", "APRROACH", "CROSSOVER", "PIPEWORKS", "VOID", "CONCOURSE", "BUNKER", "INCLINATOR", "ABYSS", "SUBSTATION"};
-        private static string[] supplyNamesInstitution = { "ARRAY", "STUDIO", "SUITE", "LOFT", "PENTHOUSE", "GREENWALL", "FENESTRA", "JUDGEMENT", "PRESIDIO", "DISSONANCE", "CLERESTORY", "HELIX", "FACILITY", "STACKS", "ALTAR", "PUMP" };
+        private static readonly string[] holdNamesInstitution = ["HUB", "LIBRARY", "GARDEN", "ATRIUM", "LOBBY", "HEDRONS", "TURBINE", "HYDRO", "SPILLWAY", "RODS", "STORAGE", "APRROACH", "CROSSOVER", "PIPEWORKS", "VOID", "CONCOURSE", "BUNKER", "INCLINATOR", "ABYSS", "SUBSTATION"];
+        private static readonly string[] supplyNamesInstitution = ["ARRAY", "STUDIO", "SUITE", "LOFT", "PENTHOUSE", "GREENWALL", "FENESTRA", "JUDGEMENT", "PRESIDIO", "DISSONANCE", "CLERESTORY", "HELIX", "FACILITY", "STACKS", "ALTAR", "PUMP"];
         private static bool isInitialized = false;
+
+        private static TNHLevelStatus levelStatus = new();
+        private static TNHPhaseStatus phaseStatus = new();
+        private static TNHHoldPhaseStatus holdPhaseStatus = new();
 
         [HarmonyPrefix]
         [HarmonyPatch(typeof(TNH_Manager), nameof(TNH_Manager.DelayedInit))]
@@ -57,56 +67,72 @@ namespace H3Status.Patches
         [HarmonyPatch(typeof(TNH_Manager), nameof(TNH_Manager.DelayedInit))]
         private static void TNHLevelEventPost(TNH_Manager __instance)
         {
+            if (!Config.TNHLevelEvent.Value) { return; }
+
             bool becameInitialized = !isInitialized && __instance.m_hasInit;
-            if (!becameInitialized) return;
+            if (!becameInitialized) { return; }
 
-            var levelEventJSON = new JSONObject();
+            levelStatus = new TNHLevelStatus
+            {
+                Seed = __instance.HoldSequenceSeed,
+                EquipmentSeed = __instance.equipmentSeed,
+                LevelName = __instance.LevelName,
+                CharacterName = __instance.C.DisplayName,
+                ScoreMultiplier = TNHScoreHandler.GetMultiplier(),
 
-            levelEventJSON["type"] = "TNHLevelEvent";
-            var levelJSON = levelEventJSON["status"].AsObject;
-            levelJSON["seed"] = __instance.m_holdSequenceSeed;
-            levelJSON["levelName"] = __instance.LevelName;
-            levelJSON["characterName"] = __instance.C.DisplayName;
-            levelJSON["scoreMultiplier"] = TNHScoreHandler.GetMultiplier();
-            levelJSON["aiDifficulty"] = __instance.AI_Difficulty.ToString();
-            levelJSON["radarMode"] = __instance.RadarMode.ToString();
-            levelJSON["targetMode"] = __instance.TargetMode.ToString();
-            levelJSON["healthMode"] = __instance.HealthMode.ToString();
-            levelJSON["equipmentMode"] = __instance.EquipmentMode.ToString();
+                AiDifficulty = __instance.AI_Difficulty,
+                RadarMode = __instance.RadarMode,
+                TargetMode = __instance.TargetMode,
+                HealthMode = __instance.HealthMode,
+                EquipmentMode = __instance.EquipmentMode
+            };
 
-            Server.ServerBehavior.SendMessage(levelEventJSON);
+            Server.SendMessage(new Event
+            {
+                Type = EventType.TNHLevelEvent,
+                Status = levelStatus
+            });
         }
 
         [HarmonyPostfix]
         [HarmonyPatch(typeof(TNH_Manager), nameof(TNH_Manager.SetPhase))]
         private static void TNHPhaseEvent(TNH_Phase p, TNH_Manager __instance)
         {
-            var phaseEventJSON = new JSONObject();
+            if (!Config.TNHPhaseEvent.Value) { return; }
 
-            phaseEventJSON["type"] = "TNHPhaseEvent";
-            var phaseJSON = phaseEventJSON["status"].AsObject;
-            phaseJSON["phase"] = p.ToString();
-            phaseJSON["level"] = __instance.m_level;
-            phaseJSON["count"] = __instance.m_maxLevels;
-            phaseJSON["seed"] = __instance.m_holdSequenceSeed;
-            phaseJSON["hold"] = __instance.m_curHoldIndex;
-            var supplyPointsJSON = phaseJSON["supply"].AsArray;
-            foreach(int i in __instance.m_activeSupplyPointIndicies)
+            phaseStatus = new TNHPhaseStatus
             {
-                supplyPointsJSON.Add(i);
+                Phase = p,
+                Level = __instance.m_level,
+                Count = __instance.m_maxLevels,
+                Seed = __instance.m_holdSequenceSeed,
+                Hold = __instance.m_curHoldIndex,
+                Supply = new(),
+                HoldName = null,
+                SupplyNames = null
+            };
+
+            foreach (int i in __instance.m_activeSupplyPointIndicies)
+            {
+                phaseStatus.Supply.Add(i);
             }
 
             if (SceneHandler.activeScene == "Institution")
             {
-                phaseJSON["holdName"] = holdNamesInstitution[__instance.m_curHoldIndex];
-                var supplyPointNamesJSON = phaseJSON["supplyNames"].AsArray;
-                foreach(int i in __instance.m_activeSupplyPointIndicies)
+                phaseStatus.HoldName = holdNamesInstitution[__instance.m_curHoldIndex];
+
+                phaseStatus.SupplyNames = new();
+                foreach (int i in __instance.m_activeSupplyPointIndicies)
                 {
-                    supplyPointNamesJSON.Add(supplyNamesInstitution[i]);
+                    phaseStatus.SupplyNames.Add(supplyNamesInstitution[i]);
                 }
             }
 
-            Server.ServerBehavior.SendMessage(phaseEventJSON);
+            Server.SendMessage(new Event
+            {
+                Type = EventType.TNHPhaseEvent,
+                Status = phaseStatus
+            });
         }
 
         [HarmonyPostfix]
@@ -115,25 +141,49 @@ namespace H3Status.Patches
         [HarmonyPatch(typeof(TNH_HoldPoint), nameof(TNH_HoldPoint.CompletePhase))]
         private static void TNHHoldPhaseEvent(TNH_HoldPoint __instance)
         {
-            var phaseEventJSON = new JSONObject();
+            if (!Config.TNHHoldPhaseEvent.Value) { return; }
 
-            phaseEventJSON["type"] = "TNHHoldPhaseEvent";
-            var phaseJSON = phaseEventJSON["status"].AsObject;
-            phaseJSON["phase"] = __instance.m_state.ToString();
-            phaseJSON["level"] = __instance.m_phaseIndex;
-            phaseJSON["count"] = __instance.H.Phases.Count;
-            phaseJSON["encryptionType"] = __instance.m_curPhase.Encryption.ToString();
-            phaseJSON["encryptionCount"] = __instance.m_numTargsToSpawn;
-            phaseJSON["encryptionTime"] = 120f;
+            holdPhaseStatus = new TNHHoldPhaseStatus
+            {
+                Phase = __instance.m_state,
+                Level = __instance.m_phaseIndex,
+                Count = __instance.H.Phases.Count,
+                EncryptionType = __instance.m_curPhase.Encryption,
+                EncryptionCount = __instance.m_numTargsToSpawn,
+                EncryptionTime = 120f
+            };
 
-            Server.ServerBehavior.SendMessage(phaseEventJSON);
+            Server.SendMessage(new Event
+            {
+                Type = EventType.TNHHoldPhaseEvent,
+                Status = holdPhaseStatus
+            });
         }
     }
 
     [HarmonyPatch]
     internal static class TNHScoreHandler
     {
-        private static int[] eventMultiplier = { 5000, 5, 1000, 1000, 50, 100, 50, 50, 50, 50, 25, 500, 1000, 50, 500 };
+        private static TNHScoreStatus scoreStatus = new();
+        private static TNHTokenStatus tokenStatus = new();
+
+        private static readonly int[] eventMultiplier = [
+            10000, // HoldPhaseComplete
+            10,    // HoldDecisecondsRemaining
+            1,
+            10,   // HoldPhaseHealthBonus
+            100,  // KillBonus
+            200,  // HeadShotBonus
+            100,  // MeleeKillBonus
+            100,  // JointBreakBonus
+            100,  // JointSeverBonus
+            1,
+            250,  // KillStreakBonus
+            10,   // TakePhaseHealthBonus
+            1,
+            1,
+            250   // TakeGuardClearSpeedBonus
+        ];
 
         private static int GetEventScore(TNH_Manager.ScoringEvent ev, int num)
         {
@@ -185,193 +235,191 @@ namespace H3Status.Patches
         [HarmonyPatch(typeof(TNH_Manager), nameof(TNH_Manager.IncrementScoringStat))]
         private static void TNHScoreEvent(TNH_Manager.ScoringEvent ev, int num, TNH_Manager __instance)
         {
-            int baseScore = __instance.ReturnSummedBaseScore();
+            if (Config.LogScoreEvents.Value)
+            {
+                Plugin.Logger.LogMessage($"{ev}: {GetEventScore(ev, num) * GetMultiplier()} ({GetEventScore(ev, num)}x{GetMultiplier()})");
+            }
 
-            Plugin.Logger.LogInfo($"{ev}: {GetEventScore(ev, num) * GetMultiplier()} ({GetEventScore(ev, num)}x{GetMultiplier()})");
-            // Plugin.Logger.LogInfo(GetTotalScore());
+            if (!Config.TNHScoreEvent.Value) { return; }
 
-            var scoreEventJSON = new JSONObject();
+            scoreStatus = new TNHScoreStatus
+            {
+                Type = ev,
+                Value = GetEventScore(ev, num),
+                Mult = GetMultiplier(),
+                Score = GetTotalScore()
+            };
 
-            scoreEventJSON["type"] = "TNHScoreEvent";
-            var scoreJSON = scoreEventJSON["status"].AsObject;
-            scoreJSON["type"] = ev.ToString();
-            scoreJSON["value"] = GetEventScore(ev, num);
-            scoreJSON["mult"] = GetMultiplier();
-            scoreJSON["score"] = GetTotalScore();
-
-            Server.ServerBehavior.SendMessage(scoreEventJSON);
+            Server.SendMessage(new Event
+            {
+                Type = EventType.TNHScoreEvent,
+                Status = scoreStatus
+            });
         }
 
         [HarmonyPostfix]
         [HarmonyPatch(typeof(TNH_HoldPoint), nameof(TNH_HoldPoint.TargetDestroyed))]
         private static void TNHEncryptionDestroyed()
         {
-            var encryptionEventJSON = new JSONObject();
-            encryptionEventJSON["type"] = "TNHEncryptionDestroyed";
-            Server.ServerBehavior.SendMessage(encryptionEventJSON);
+            if (!Config.TNHEncryptionDestroyed.Value) { return; }
+
+            Server.SendMessage(new Event
+            {
+                Type = EventType.TNHEncryptionDestroyed
+            });
         }
 
         [HarmonyPostfix]
         [HarmonyPatch(typeof(TNH_Manager), nameof(TNH_Manager.AddTokens))]
         private static void TNHTokenEventAdd(int i, TNH_Manager __instance)
         {
-            var tokenEventJSON = new JSONObject();
+            if (!Config.TNHTokenEvent.Value) { return; }
 
-            tokenEventJSON["type"] = "TNHTokenEvent";
-            var tokenJSON = tokenEventJSON["status"].AsObject;
-            tokenJSON["change"] = i;
-            tokenJSON["tokens"] = __instance.m_numTokens;
+            tokenStatus = new TNHTokenStatus
+            {
+                Change = i,
+                Tokens = __instance.m_numTokens
+            };
 
-            Server.ServerBehavior.SendMessage(tokenEventJSON);
+            Server.SendMessage(new Event
+            {
+                Type = EventType.TNHTokenEvent,
+                Status = tokenStatus
+            });
         }
 
         [HarmonyPostfix]
         [HarmonyPatch(typeof(TNH_Manager), nameof(TNH_Manager.SubtractTokens))]
         private static void TNHTokenEventSubtract(int i, TNH_Manager __instance)
         {
-            var tokenEventJSON = new JSONObject();
+            if (!Config.TNHTokenEvent.Value) { return; }
 
-            tokenEventJSON["type"] = "TNHTokenEvent";
-            var tokenJSON = tokenEventJSON["status"].AsObject;
-            tokenJSON["change"] = -i;
-            tokenJSON["tokens"] = __instance.m_numTokens;
-
-            Server.ServerBehavior.SendMessage(tokenEventJSON);
-        }
-
-        [HarmonyPrefix]
-        [HarmonyPatch(typeof(TNH_Manager), nameof(TNH_Manager.OnSosigAlert))]
-        private static void TNHLostStealthBonusTake(TNH_Manager __instance)
-        {
-            if (__instance.Phase != TNH_Phase.Take) return;
-            if (__instance.m_alertedThisPhaseFlag) return;
-
-            var bonusEventJSON = new JSONObject();
-            bonusEventJSON["type"] = "TNHLostStealthBonus";
-            Server.ServerBehavior.SendMessage(bonusEventJSON);
-        }
-
-        [HarmonyPrefix]
-        [HarmonyPatch(typeof(TNH_Manager), nameof(TNH_Manager.OnSosigKill))]
-        private static void TNHLostStealthBonusHold(Sosig s, TNH_Manager __instance)
-        {
-            if (__instance.m_hasGuardBeenKilledThatWasAltered) return;
-
-            if (s.GetDiedFromIFF() == GM.CurrentPlayerBody.GetPlayerIFF() &&
-                __instance.Phase == TNH_Phase.Take && s.HasEverBeenAlerted() &&
-                __instance.m_holdPointGuards.Contains(s))
+            tokenStatus = new TNHTokenStatus
             {
-                var bonusEventJSON = new JSONObject();
-                bonusEventJSON["type"] = "TNHLostStealthBonus";
-                Server.ServerBehavior.SendMessage(bonusEventJSON);
-            }
-        }
+                Change = -i,
+                Tokens = __instance.m_numTokens
+            };
 
-        [HarmonyPrefix]
-        [HarmonyPatch(typeof(TNH_Manager), nameof(TNH_Manager.PlayerTookDamage))]
-        private static void TNHLostNoHitBonusPhase(TNH_Manager __instance)
-        {
-            if (__instance.m_tookDamageThisPhaseFlag) return;
-
-            var bonusEventJSON = new JSONObject();
-            bonusEventJSON["type"] = "TNHLostNoHitBonus";
-            Server.ServerBehavior.SendMessage(bonusEventJSON);
-        }
-
-        [HarmonyPrefix]
-        [HarmonyPatch(typeof(TNH_HoldPoint), nameof(TNH_HoldPoint.PlayerTookDamage))]
-        private static void TNHLostNoHitBonusHold(TNH_HoldPoint __instance)
-        {
-            if (__instance.m_hasBeenDamagedThisPhase && __instance.m_hasBeenDamagedThisHold) return;
-
-            var bonusEventJSON = new JSONObject();
-            bonusEventJSON["type"] = "TNHLostNoHitBonus";
-            Server.ServerBehavior.SendMessage(bonusEventJSON);
+            Server.SendMessage(new Event
+            {
+                Type = EventType.TNHTokenEvent,
+                Status = tokenStatus
+            });
         }
     }
 
     [HarmonyPatch]
     internal static class PlayerHealthHandler
     {
+        private static HealthStatus healthStatus = new();
+        private static BuffStatus buffStatus = new();
+
         [HarmonyPostfix]
         [HarmonyPatch(typeof(FVRPlayerBody), nameof(FVRPlayerBody.RegisterPlayerHit))]
         private static void HealthEventHit(float DamagePoints, bool FromSelf, int iff, FVRPlayerBody __instance)
         {
-            var healthEventJSON = new JSONObject();
+            if (!Config.HealthEvent.Value) { return; }
 
-            healthEventJSON["type"] = "healthEvent";
-            var healthJSON = healthEventJSON["status"].AsObject;
-            healthJSON["change"] = -(int)DamagePoints;
-            healthJSON["health"] = (int)__instance.Health;
-            healthJSON["maxHealth"] = (int)__instance.m_startingHealth;
+            healthStatus = new HealthStatus
+            {
+                Change = -(int)DamagePoints,
+                Health = (int)__instance.Health,
+                MaxHealth = (int)__instance.m_startingHealth
+            };
 
-            Server.ServerBehavior.SendMessage(healthEventJSON);
+            Server.SendMessage(new Event
+            {
+                Type = EventType.HealthEvent,
+                Status = healthStatus
+            });
         }
 
         [HarmonyPostfix]
         [HarmonyPatch(typeof(FVRPlayerBody), nameof(FVRPlayerBody.HarmPercent))]
         private static void HealthEventHarm(float f, FVRPlayerBody __instance)
         {
-            var healthEventJSON = new JSONObject();
+            if (!Config.HealthEvent.Value) { return; }
 
-            healthEventJSON["type"] = "healthEvent";
-            var healthJSON = healthEventJSON["status"].AsObject;
-            healthJSON["change"] = -(int)(__instance.m_startingHealth * f);
-            healthJSON["health"] = (int)__instance.Health;
-            healthJSON["maxHealth"] = (int)__instance.m_startingHealth;
+            healthStatus = new HealthStatus
+            {
+                Change = -(int)(__instance.m_startingHealth * f),
+                Health = (int)__instance.Health,
+                MaxHealth = (int)__instance.m_startingHealth
+            };
 
-            Server.ServerBehavior.SendMessage(healthEventJSON);
+            Server.SendMessage(new Event
+            {
+                Type = EventType.HealthEvent,
+                Status = healthStatus
+            });
         }
 
         [HarmonyPostfix]
         [HarmonyPatch(typeof(FVRPlayerBody), nameof(FVRPlayerBody.Init))]
         private static void HealthEventInit(FVRPlayerBody __instance)
         {
-            var healthEventJSON = new JSONObject();
+            if (!Config.HealthEvent.Value) { return; }
 
-            healthEventJSON["type"] = "healthEvent";
-            var healthJSON = healthEventJSON["status"].AsObject;
-            healthJSON["change"] = 0;
-            healthJSON["health"] = (int)__instance.Health;
-            healthJSON["maxHealth"] = (int)__instance.m_startingHealth;
+            healthStatus = new HealthStatus
+            {
+                Change = 0,
+                Health = (int)__instance.Health,
+                MaxHealth = (int)__instance.m_startingHealth
+            };
 
-            Server.ServerBehavior.SendMessage(healthEventJSON);
+            Server.SendMessage(new Event
+            {
+                Type = EventType.HealthEvent,
+                Status = healthStatus
+            });
         }
 
         [HarmonyPrefix]
         [HarmonyPatch(typeof(FVRPlayerBody), nameof(FVRPlayerBody.SetHealthThreshold))]
         private static void HealthEventUpdate(float h, FVRPlayerBody __instance)
         {
-            var healthEventJSON = new JSONObject();
+            if (!Config.HealthEvent.Value) { return; }
 
-            healthEventJSON["type"] = "healthEvent";
-            var healthJSON = healthEventJSON["status"].AsObject;
-            healthJSON["change"] = (int)(h - __instance.Health);
-            healthJSON["health"] = (int)h;
-            healthJSON["maxHealth"] = (int)h;
+            healthStatus = new HealthStatus
+            {
+                Change = (int)(h - __instance.Health),
+                Health = (int)h,
+                MaxHealth = (int)h
+            };
 
-            Server.ServerBehavior.SendMessage(healthEventJSON);
+            Server.SendMessage(new Event
+            {
+                Type = EventType.HealthEvent,
+                Status = healthStatus
+            });
         }
 
         [HarmonyPostfix]
         [HarmonyPatch(typeof(FVRPlayerBody), nameof(FVRPlayerBody.HealPercent))]
         private static void HealthEventHeal(float f, FVRPlayerBody __instance)
         {
-            var healthEventJSON = new JSONObject();
+            if (!Config.HealthEvent.Value) { return; }
 
-            healthEventJSON["type"] = "healthEvent";
-            var healthJSON = healthEventJSON["status"].AsObject;
-            healthJSON["change"] = (int)(__instance.m_startingHealth * f);
-            healthJSON["health"] = (int)__instance.Health;
-            healthJSON["maxHealth"] = (int)__instance.m_startingHealth;
+            healthStatus = new HealthStatus
+            {
+                Change = (int)(__instance.m_startingHealth * f),
+                Health = (int)__instance.Health,
+                MaxHealth = (int)__instance.m_startingHealth
+            };
 
-            Server.ServerBehavior.SendMessage(healthEventJSON);
+            Server.SendMessage(new Event
+            {
+                Type = EventType.HealthEvent,
+                Status = healthStatus
+            });
         }
 
         [HarmonyPostfix]
         [HarmonyPatch(typeof(FVRPlayerBody), nameof(FVRPlayerBody.ActivatePower))]
         private static void BuffEvent(PowerupType type, PowerUpIntensity intensity, PowerUpDuration d, bool isPuke, bool isInverted, float DurationOverride = -1f)
         {
+            if (!Config.BuffEvent.Value) { return; }
+
             float duration = 1f;
 
             switch (d)
@@ -398,15 +446,18 @@ namespace H3Status.Patches
                 duration = DurationOverride;
             }
 
-            var powerEventJSON = new JSONObject();
+            buffStatus = new BuffStatus
+            {
+                Type = type,
+                Duration = duration,
+                Inverted = isInverted
+            };
 
-            powerEventJSON["type"] = "buffEvent";
-            var powerJSON = powerEventJSON["status"].AsObject;
-            powerJSON["type"] = type.ToString();
-            powerJSON["duration"] = duration;
-            powerJSON["inverted"] = isInverted;
-
-            Server.ServerBehavior.SendMessage(powerEventJSON);
+            Server.SendMessage(new Event
+            {
+                Type = EventType.BuffEvent,
+                Status = buffStatus
+            });
         }
     }
 
@@ -414,31 +465,38 @@ namespace H3Status.Patches
     internal static class WeaponAmmoHandler
     {
         private static bool isUpdatePending = false;
-        private static JSONObject ammoEventJSON = new JSONObject();
+        private static AmmoStatus ammoStatus = new();
 
         [HarmonyPrefix]
         [HarmonyPatch(typeof(FVRFireArm), nameof(FVRFireArm.FVRFixedUpdate))]
         private static void HandlePendingEvent()
         {
+            if (!Config.AmmoEvent.Value) { return; }
+
             if (isUpdatePending)
             {
                 isUpdatePending = false;
-                Server.ServerBehavior.SendMessage(ammoEventJSON);
+                Server.SendMessage(new Event
+                {
+                    Type = EventType.AmmoEvent,
+                    Status = ammoStatus
+                });
             }
         }
 
         private static void UpdateAmmoCount(FVRFireArm fireArm)
         {
-            if (fireArm == null || fireArm.m_hand == null) return;
+            if (fireArm == null || fireArm.m_hand == null) { return; }
+
             string weaponName = string.Empty;
-            int? weaponHand = fireArm.m_hand.IsThisTheRightHand ? 1 : 0;
-            string roundType = fireArm.RoundType.ToString();
-            string roundClass = roundType;
+            int weaponHand = fireArm.m_hand.IsThisTheRightHand ? 1 : 0;
+            FireArmRoundType roundType = fireArm.RoundType;
+            FireArmRoundClass roundClass = default;
             int currentAmmo = 0;
             int spentAmmo = 0;
             int maxCapacity = 0;
 
-            try { roundClass = AM.GetDefaultRoundClass(fireArm.RoundType).ToString(); }
+            try { roundClass = AM.GetDefaultRoundClass(fireArm.RoundType); }
             catch { }
 
             if (fireArm.ObjectWrapper != null)
@@ -465,7 +523,7 @@ namespace H3Status.Patches
                     {
                         if (fireArm.Magazine.LoadedRounds[i] != null)
                         {
-                            roundClass = fireArm.Magazine.LoadedRounds[i].LR_Class.ToString();
+                            roundClass = fireArm.Magazine.LoadedRounds[i].LR_Class;
                         }
                     }
                 }
@@ -490,31 +548,33 @@ namespace H3Status.Patches
                     }
                     else
                     {
-                        roundClass = chamber.m_round.RoundClass.ToString();
+                        roundClass = chamber.m_round.RoundClass;
                         currentAmmo += 1;
                     }
                 }
             }
 
-            ammoEventJSON["type"] = "ammoEvent";
-            var ammoJSON = ammoEventJSON["status"].AsObject;
-            ammoJSON["weapon"] = weaponName;
-            ammoJSON["hand"] = weaponHand;
-            ammoJSON["roundType"] = roundType;
-            ammoJSON["roundClass"] = roundClass;
-            ammoJSON["current"] = currentAmmo;
-            ammoJSON["spent"] = spentAmmo;
-            ammoJSON["capacity"] = maxCapacity;
+            ammoStatus = new AmmoStatus
+            {
+                Weapon = weaponName,
+                Hand = weaponHand,
+                RoundType = roundType,
+                RoundClass = roundClass,
+                Current = currentAmmo,
+                Spent = spentAmmo,
+                Capacity = maxCapacity
+            };
 
             isUpdatePending = true;
         }
 
         [HarmonyPostfix]
-        [HarmonyPatch(typeof(FVRFireArmMagazine), nameof(FVRFireArmMagazine.AddRound), new[] {typeof(FireArmRoundClass), typeof(bool), typeof(bool)})]
-        [HarmonyPatch(typeof(FVRFireArmMagazine), nameof(FVRFireArmMagazine.AddRound), new[] {typeof(FVRFireArmRound), typeof(bool), typeof(bool), typeof(bool)})]
+        [HarmonyPatch(typeof(FVRFireArmMagazine), nameof(FVRFireArmMagazine.AddRound), [typeof(FireArmRoundClass), typeof(bool), typeof(bool)])]
+        [HarmonyPatch(typeof(FVRFireArmMagazine), nameof(FVRFireArmMagazine.AddRound), [typeof(FVRFireArmRound), typeof(bool), typeof(bool), typeof(bool)])]
         // [HarmonyPatch(typeof(FVRFireArmMagazine), nameof(FVRFireArmMagazine.UpdateBulletDisplay))]
         private static void AmmoEventMagazine(FVRFireArmMagazine __instance)
         {
+            if (!Config.AmmoEvent.Value) { return; }
             UpdateAmmoCount(__instance.FireArm);
         }
 
@@ -525,6 +585,7 @@ namespace H3Status.Patches
         // [HarmonyPatch(typeof(FVRFireArm), nameof(FVRFireArm.EjectClip))]
         private static void AmmoEventFireArm(FVRFireArm __instance)
         {
+            if (!Config.AmmoEvent.Value) { return; }
             UpdateAmmoCount(__instance);
         }
 
@@ -532,6 +593,8 @@ namespace H3Status.Patches
         [HarmonyPatch(typeof(FVRFireArmChamber), nameof(FVRFireArmChamber.UpdateProxyDisplay))]
         private static void AmmoEventChamber(FVRFireArmChamber __instance)
         {
+            if (!Config.AmmoEvent.Value) { return; }
+
             if (__instance.Firearm != null)
             {
                 UpdateAmmoCount(__instance.Firearm);
@@ -542,10 +605,6 @@ namespace H3Status.Patches
                 if (fireArm != null)
                 {
                     UpdateAmmoCount(fireArm);
-                }
-                else
-                {
-                    Plugin.Logger.LogError("Can't get chamber fireArm");
                 }
             }
         }
