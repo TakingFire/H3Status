@@ -28,6 +28,8 @@ namespace H3Status.Patches
         [HarmonyPatch(typeof(SteamVR_LoadLevel), nameof(SteamVR_LoadLevel.Begin))]
         private static void SceneEvent(string levelName)
         {
+            if (!Config.SceneEvent.Value) { return; }
+
             activeScene = levelName;
 
             sceneStatus = new SceneStatus
@@ -65,8 +67,10 @@ namespace H3Status.Patches
         [HarmonyPatch(typeof(TNH_Manager), nameof(TNH_Manager.DelayedInit))]
         private static void TNHLevelEventPost(TNH_Manager __instance)
         {
+            if (!Config.TNHLevelEvent.Value) { return; }
+
             bool becameInitialized = !isInitialized && __instance.m_hasInit;
-            if (!becameInitialized) return;
+            if (!becameInitialized) { return; }
 
             levelStatus = new TNHLevelStatus
             {
@@ -94,6 +98,8 @@ namespace H3Status.Patches
         [HarmonyPatch(typeof(TNH_Manager), nameof(TNH_Manager.SetPhase))]
         private static void TNHPhaseEvent(TNH_Phase p, TNH_Manager __instance)
         {
+            if (!Config.TNHPhaseEvent.Value) { return; }
+
             phaseStatus = new TNHPhaseStatus
             {
                 Phase = p,
@@ -135,6 +141,8 @@ namespace H3Status.Patches
         [HarmonyPatch(typeof(TNH_HoldPoint), nameof(TNH_HoldPoint.CompletePhase))]
         private static void TNHHoldPhaseEvent(TNH_HoldPoint __instance)
         {
+            if (!Config.TNHHoldPhaseEvent.Value) { return; }
+
             holdPhaseStatus = new TNHHoldPhaseStatus
             {
                 Phase = __instance.m_state,
@@ -227,7 +235,12 @@ namespace H3Status.Patches
         [HarmonyPatch(typeof(TNH_Manager), nameof(TNH_Manager.IncrementScoringStat))]
         private static void TNHScoreEvent(TNH_Manager.ScoringEvent ev, int num, TNH_Manager __instance)
         {
-            Plugin.Logger.LogMessage($"{ev}: {GetEventScore(ev, num) * GetMultiplier()} ({GetEventScore(ev, num)}x{GetMultiplier()})");
+            if (Config.LogScoreEvents.Value)
+            {
+                Plugin.Logger.LogMessage($"{ev}: {GetEventScore(ev, num) * GetMultiplier()} ({GetEventScore(ev, num)}x{GetMultiplier()})");
+            }
+
+            if (!Config.TNHScoreEvent.Value) { return; }
 
             scoreStatus = new TNHScoreStatus
             {
@@ -248,6 +261,8 @@ namespace H3Status.Patches
         [HarmonyPatch(typeof(TNH_HoldPoint), nameof(TNH_HoldPoint.TargetDestroyed))]
         private static void TNHEncryptionDestroyed()
         {
+            if (!Config.TNHEncryptionDestroyed.Value) { return; }
+
             Server.SendMessage(new Event
             {
                 Type = EventType.TNHEncryptionDestroyed
@@ -258,6 +273,8 @@ namespace H3Status.Patches
         [HarmonyPatch(typeof(TNH_Manager), nameof(TNH_Manager.AddTokens))]
         private static void TNHTokenEventAdd(int i, TNH_Manager __instance)
         {
+            if (!Config.TNHTokenEvent.Value) { return; }
+
             tokenStatus = new TNHTokenStatus
             {
                 Change = i,
@@ -275,6 +292,8 @@ namespace H3Status.Patches
         [HarmonyPatch(typeof(TNH_Manager), nameof(TNH_Manager.SubtractTokens))]
         private static void TNHTokenEventSubtract(int i, TNH_Manager __instance)
         {
+            if (!Config.TNHTokenEvent.Value) { return; }
+
             tokenStatus = new TNHTokenStatus
             {
                 Change = -i,
@@ -299,6 +318,8 @@ namespace H3Status.Patches
         [HarmonyPatch(typeof(FVRPlayerBody), nameof(FVRPlayerBody.RegisterPlayerHit))]
         private static void HealthEventHit(float DamagePoints, bool FromSelf, int iff, FVRPlayerBody __instance)
         {
+            if (!Config.HealthEvent.Value) { return; }
+
             healthStatus = new HealthStatus
             {
                 Change = -(int)DamagePoints,
@@ -317,6 +338,8 @@ namespace H3Status.Patches
         [HarmonyPatch(typeof(FVRPlayerBody), nameof(FVRPlayerBody.HarmPercent))]
         private static void HealthEventHarm(float f, FVRPlayerBody __instance)
         {
+            if (!Config.HealthEvent.Value) { return; }
+
             healthStatus = new HealthStatus
             {
                 Change = -(int)(__instance.m_startingHealth * f),
@@ -335,6 +358,8 @@ namespace H3Status.Patches
         [HarmonyPatch(typeof(FVRPlayerBody), nameof(FVRPlayerBody.Init))]
         private static void HealthEventInit(FVRPlayerBody __instance)
         {
+            if (!Config.HealthEvent.Value) { return; }
+
             healthStatus = new HealthStatus
             {
                 Change = 0,
@@ -353,6 +378,8 @@ namespace H3Status.Patches
         [HarmonyPatch(typeof(FVRPlayerBody), nameof(FVRPlayerBody.SetHealthThreshold))]
         private static void HealthEventUpdate(float h, FVRPlayerBody __instance)
         {
+            if (!Config.HealthEvent.Value) { return; }
+
             healthStatus = new HealthStatus
             {
                 Change = (int)(h - __instance.Health),
@@ -371,6 +398,8 @@ namespace H3Status.Patches
         [HarmonyPatch(typeof(FVRPlayerBody), nameof(FVRPlayerBody.HealPercent))]
         private static void HealthEventHeal(float f, FVRPlayerBody __instance)
         {
+            if (!Config.HealthEvent.Value) { return; }
+
             healthStatus = new HealthStatus
             {
                 Change = (int)(__instance.m_startingHealth * f),
@@ -389,6 +418,8 @@ namespace H3Status.Patches
         [HarmonyPatch(typeof(FVRPlayerBody), nameof(FVRPlayerBody.ActivatePower))]
         private static void BuffEvent(PowerupType type, PowerUpIntensity intensity, PowerUpDuration d, bool isPuke, bool isInverted, float DurationOverride = -1f)
         {
+            if (!Config.BuffEvent.Value) { return; }
+
             float duration = 1f;
 
             switch (d)
@@ -440,6 +471,8 @@ namespace H3Status.Patches
         [HarmonyPatch(typeof(FVRFireArm), nameof(FVRFireArm.FVRFixedUpdate))]
         private static void HandlePendingEvent()
         {
+            if (!Config.AmmoEvent.Value) { return; }
+
             if (isUpdatePending)
             {
                 isUpdatePending = false;
@@ -453,7 +486,8 @@ namespace H3Status.Patches
 
         private static void UpdateAmmoCount(FVRFireArm fireArm)
         {
-            if (fireArm == null || fireArm.m_hand == null) return;
+            if (fireArm == null || fireArm.m_hand == null) { return; }
+
             string weaponName = string.Empty;
             int weaponHand = fireArm.m_hand.IsThisTheRightHand ? 1 : 0;
             FireArmRoundType roundType = fireArm.RoundType;
@@ -540,6 +574,7 @@ namespace H3Status.Patches
         // [HarmonyPatch(typeof(FVRFireArmMagazine), nameof(FVRFireArmMagazine.UpdateBulletDisplay))]
         private static void AmmoEventMagazine(FVRFireArmMagazine __instance)
         {
+            if (!Config.AmmoEvent.Value) { return; }
             UpdateAmmoCount(__instance.FireArm);
         }
 
@@ -550,6 +585,7 @@ namespace H3Status.Patches
         // [HarmonyPatch(typeof(FVRFireArm), nameof(FVRFireArm.EjectClip))]
         private static void AmmoEventFireArm(FVRFireArm __instance)
         {
+            if (!Config.AmmoEvent.Value) { return; }
             UpdateAmmoCount(__instance);
         }
 
@@ -557,6 +593,8 @@ namespace H3Status.Patches
         [HarmonyPatch(typeof(FVRFireArmChamber), nameof(FVRFireArmChamber.UpdateProxyDisplay))]
         private static void AmmoEventChamber(FVRFireArmChamber __instance)
         {
+            if (!Config.AmmoEvent.Value) { return; }
+
             if (__instance.Firearm != null)
             {
                 UpdateAmmoCount(__instance.Firearm);

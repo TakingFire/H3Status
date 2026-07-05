@@ -2,7 +2,6 @@
 
 using System.Collections.Generic;
 using Valve.Newtonsoft.Json;
-using Valve.Newtonsoft.Json.Serialization;
 using Valve.Newtonsoft.Json.Converters;
 using FistVR;
 

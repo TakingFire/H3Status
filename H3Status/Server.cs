@@ -21,7 +21,7 @@ namespace H3Status
         public static void Start(int port)
         {
             if (_server != null) { return; }
-            FleckLog.Level = LogLevel.Error;
+            FleckLog.Level = LogLevel.Warn;
 
             _server = new WebSocketServer($"ws://0.0.0.0:{port}");
 
@@ -46,9 +46,9 @@ namespace H3Status
 
         public static void Stop()
         {
-            Plugin.Logger.LogInfo($"Server shutting down");
-
             if (_server == null) { return; }
+            Plugin.Logger.LogInfo("Server shutting down");
+
             foreach (var instance in _instances)
             {
                 instance.Close();
