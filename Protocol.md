@@ -1,4 +1,4 @@
-# H3Status 0.3.0 Event Reference
+# H3Status 0.4.0 Event Reference
 
 > ⚠️ **Warning:** This data structure is **under development** and is **subject to change**.
 
@@ -34,12 +34,12 @@ Type | Status | Description
 `"ammoEvent"` | [AmmoStatus](Protocol.md#ammostatus-object) | Sent when the ammunition in a weapon changes.
 `"healthEvent"` | [HealthStatus](Protocol.md#healthstatus-object) | Sent when the player health changes.
 `"buffEvent"` | [BuffStatus](Protocol.md#buffstatus-object) | Sent when the player uses a powerup.
-`"TNHLevelEvent"` | [TNHLevelStatus](Protocol.md#tnhlevelstatus-object) | Sent when a T&H run begins.
-`"TNHPhaseEvent"` | [TNHPhaseStatus](Protocol.md#tnhphasestatus-object) | Sent on phase change in T&H, e.g. Take, Hold, and Complete.
-`"TNHHoldPhaseEvent"` | [TNHHoldPhaseStatus](Protocol.md#tnhholdphasestatus-object) | Sent on Hold phase change in T&H, e.g. Analyzing and Hacking.
-`"TNHScoreEvent"` | [TNHScoreStatus](Protocol.md#tnhscorestatus-object) | Sent when the score changes in T&H.
-`"TNHEncryptionDestroyed"` | | Sent when an encryption target is destroyed.
-`"TNHTokenEvent"` | [TNHTokenStatus](Protocol.md#tnhtokenstatus-object) | Sent when the override token count changes in T&H.
+`"tnhLevelEvent"` | [TNHLevelStatus](Protocol.md#tnhlevelstatus-object) | Sent when a T&H run begins.
+`"tnhPhaseEvent"` | [TNHPhaseStatus](Protocol.md#tnhphasestatus-object) | Sent on phase change in T&H, e.g. Take, Hold, and Complete.
+`"tnhHoldPhaseEvent"` | [TNHHoldPhaseStatus](Protocol.md#tnhholdphasestatus-object) | Sent on Hold phase change in T&H, e.g. Analyzing and Hacking.
+`"tnhScoreEvent"` | [TNHScoreStatus](Protocol.md#tnhscorestatus-object) | Sent when the score changes in T&H.
+`"tnhEncryptionDestroyed"` | | Sent when an encryption target is destroyed.
+`"tnhTokenEvent"` | [TNHTokenStatus](Protocol.md#tnhtokenstatus-object) | Sent when the override token count changes in T&H.
 
 ### VersionStatus Object
 
@@ -148,8 +148,8 @@ Type | Status | Description
   "supply": Number[], // Indices of the current supply points
 
   // INSTITUTION ONLY:
-  "holdName"   : String, // Name of the current Hold
-  "supplyNames": String, // Name of the current supply points
+  "holdName"   : String,   // Name of the current Hold
+  "supplyNames": String[], // Names of the current supply points
 }
 ```
 

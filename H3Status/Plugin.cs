@@ -1,46 +1,41 @@
 using BepInEx;
 using BepInEx.Logging;
 using HarmonyLib;
-using WebSocketSharp.Server;
 
-namespace H3Status;
-
-[BepInProcess("h3vr.exe")]
-[BepInPlugin(Guid, Name, Version)]
-public class Plugin : BaseUnityPlugin
+namespace H3Status
 {
-    public const string Guid = "xyz.bacur.plugins.h3status";
-    public const string Name = "H3Status";
-    public const string Version = "0.4.0";
-
-
-    internal static new ManualLogSource Logger;
-    private static Harmony _harmony;
-
-    public static HttpServer server;
-    public static int port = 9504;
-
-#pragma warning disable IDE0051
-    private void Awake()
+    [BepInProcess("h3vr.exe")]
+    [BepInPlugin(Guid, Name, Version)]
+    public class Plugin : BaseUnityPlugin
     {
-        Logger = base.Logger;
-        server = new HttpServer(port);
-        server.AddWebSocketService<Server.ServerBehavior>("/");
-        server.Start();
+        public const string Guid = "xyz.bacur.plugins.h3status";
+        public const string Name = "H3Status";
+        public const string Version = "0.5.0";
 
-        Logger.LogInfo($"Server started on port {port}");
+        internal static new ManualLogSource Logger;
+        internal static Harmony Patcher;
 
-        _harmony = new Harmony(Guid);
-        _harmony.PatchAll(typeof(Patches.SceneHandler));
-        _harmony.PatchAll(typeof(Patches.TNHScoreHandler));
-        _harmony.PatchAll(typeof(Patches.TNHPhaseHandler));
-        _harmony.PatchAll(typeof(Patches.PlayerHealthHandler));
-        _harmony.PatchAll(typeof(Patches.WeaponAmmoHandler));
-    }
+        public static int port = 9504;
 
-    private void OnDestroy()
-    {
-        server.Stop();
-        _harmony.UnpatchSelf();
+        protected void Awake()
+        {
+            Logger = base.Logger;
+            Patcher = new Harmony(Guid);
+
+            Server.Start(port);
+
+            Patcher = new Harmony(Guid);
+            Patcher.PatchAll(typeof(Patches.SceneHandler));
+            Patcher.PatchAll(typeof(Patches.TNHScoreHandler));
+            Patcher.PatchAll(typeof(Patches.TNHPhaseHandler));
+            Patcher.PatchAll(typeof(Patches.PlayerHealthHandler));
+            Patcher.PatchAll(typeof(Patches.WeaponAmmoHandler));
+        }
+
+        protected void OnDestroy()
+        {
+            Server.Stop();
+            Patcher.UnpatchSelf();
+        }
     }
 }
