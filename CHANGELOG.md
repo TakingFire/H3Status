@@ -1,3 +1,12 @@
+### H3Status 0.5.0
+> **Supports H3VR 1.0 / Update 120!**
++ Added a configuration file (`BepInEx/config`)
++ Updated encryption icons for [TNHEncryptionTimer](https://github.com/TakingFire/H3Status/tree/main/Overlays#tnh-encryption-timer) 
+* Refactored most of the plugin
+* Moved to new dependencies, reducing plugin size by 75%
+* **[Breaking]** Unified `event` types to camelCase
+  * e.g. `TNHScoreEvent` → `tnhScoreEvent`, see [Protocol.md](https://github.com/TakingFire/H3Status/blob/main/Protocol.md#event-object)
+
 ### H3Status 0.4.0
 + Added a [New Overlay](https://github.com/TakingFire/H3Status/tree/main/Overlays#hl2-theme) with a familiar theme
 + Added `equipmentSeed` to `TNHLevelEvent`
