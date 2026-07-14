@@ -22,8 +22,7 @@ ws.onmessage = function (msg) {
     case "tnhScoreEvent":
       setScore(event.status);
       break;
-    case "playerDamage":
-    case "playerHeal":
+    case "healthEvent":
       setHealth(event.status);
       break;
     case "ammoEvent":

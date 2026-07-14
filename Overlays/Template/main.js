@@ -59,10 +59,9 @@ ws.onmessage = function (msg) {
     case "tnhScoreEvent":
       setScore(event.status);
       break;
-    // These events both contain the
-    // same status information
-    case "playerDamage":
-    case "playerHeal":
+    // We recieve this event every time
+    // the player's health changes
+    case "healthEvent":
       setHealth(event.status);
       break;
     // We recieve this event every time

@@ -124,7 +124,7 @@ function handleSceneEvent(event) {
 let currentPhaseIndex = 0;
 function handlePhaseEvent(event) {
   if (!globalConfig.showLevelBar) return;
-  if (event.count < 5) levelBar.setLength(event.count * 2);
+  levelBar.setLength(event.count);
 
   switch (event.phase) {
     case "Take": {
@@ -501,12 +501,14 @@ class HealthBar {
 }
 
 class ArrowBar {
-  constructor(id) {
+  constructor(length, id, templateId) {
     this.element = document.getElementById(id);
-    this.size = this.element.children.length;
+    this.template = document.getElementById(templateId);
+    this.setLength(length);
   }
 
   setColor(i, color) {
+    if (i >= this.length) return;
     this.element.children[i].style.backgroundColor = color;
   }
 
@@ -517,14 +519,22 @@ class ArrowBar {
   }
 
   setLength(length) {
-    if (length == this.size) return;
+    const $template = this.template.content;
 
-    for (let i = 0; i < this.element.children.length; i++) {
-      const e = this.element.children[i];
-      if (i < length) e.style.display = "initial";
-      else e.style.display = "none";
+    length = Math.min(length, 10);
+    const elementLength = length * $template.childElementCount;
+
+    if (elementLength == this.length) {
+      this.reset();
+      return;
     }
-    this.size = length;
+
+    this.element.replaceChildren();
+
+    for (let i = 0; i < length; i++) {
+      this.element.append($template.cloneNode(true));
+    }
+    this.length = elementLength;
   }
 }
 
@@ -694,8 +704,8 @@ if (!globalConfig.showAmmoPanel) {
 const eventLog = new Log(Math.ceil(globalConfig.eventLogLength));
 const scoreCounter = new Counter(Math.ceil(globalConfig.scoreCounterDigits));
 const healthBar = new HealthBar();
-const levelBar = new ArrowBar("level-bar");
-const phaseBar = new ArrowBar("phase-bar");
+const levelBar = new ArrowBar(5, "level-bar", "arrow-template-level");
+const phaseBar = new ArrowBar(3, "phase-bar", "arrow-template-phase");
 const ammoCounter = new AmmoCounter("ammo-counter-left");
 const ws = connect();
 

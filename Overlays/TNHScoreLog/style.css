@@ -194,11 +194,11 @@ body {
     font-family: "F2W Solid";
     font-size: calc(var(--scale) * 0.8rem);
 
-    color: #fff0;
+    color: #fff8;
 }
 
 .arrow-take {
-    flex-grow: 0.33;
+    max-width: 14px;
     margin-right: calc(var(--gap-size) / -4);
 }
 

@@ -22,24 +22,8 @@
         <div id="counter"></div>
         <div id="health-bar"><div id="health-bar-inner"></div></div>
 
-        <div id="level-bar" class="arrow-bar">
-          <div class="arrow-segment arrow-take"></div>
-          <div class="arrow-segment">1</div>
-          <div class="arrow-segment arrow-take"></div>
-          <div class="arrow-segment">2</div>
-          <div class="arrow-segment arrow-take"></div>
-          <div class="arrow-segment">3</div>
-          <div class="arrow-segment arrow-take"></div>
-          <div class="arrow-segment">4</div>
-          <div class="arrow-segment arrow-take"></div>
-          <div class="arrow-segment">5</div>
-        </div>
-
-        <div id="phase-bar" class="arrow-bar">
-          <div class="arrow-segment"></div>
-          <div class="arrow-segment"></div>
-          <div class="arrow-segment"></div>
-        </div>
+        <div id="level-bar" class="arrow-bar"></div>
+        <div id="phase-bar" class="arrow-bar"></div>
       </div>
 
       <div id="ammo-panel" class="panel">
@@ -47,6 +31,15 @@
         <div id="ammo-counter-left" class="ammo-counter"></div>
       </div>
     </div>
+
+    <template id="arrow-template-level">
+      <div class="arrow-segment arrow-take"></div>
+      <div class="arrow-segment"></div>
+    </template>
+
+    <template id="arrow-template-phase">
+      <div class="arrow-segment"></div>
+    </template>
 
     <template id="counter-column-template">
       <div class="counter-column">
