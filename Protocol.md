@@ -122,7 +122,7 @@ Type | Status | Description
 ```js
 {
   "seed"           : Number // Chosen seed
-  "equipmentSeed"  : Number // Chosed equipment seed
+  "equipmentSeed"  : Number // Chosen equipment seed
   "levelName"      : String // Name of the current level
   "characterName"  : String // Name of the current character
   "scoreMultiplier": Number // Total base score multiplier

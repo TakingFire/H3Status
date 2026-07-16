@@ -45,12 +45,12 @@ Download: [DownGit](https://downgit.github.io/#/home?url=https://github.com/Taki
 
 ### [TNH Score Breakdown](https://github.com/quilavad/TNHScoreBreakdown) by [Quilavad](https://github.com/quilavad)
 
-> **Note: Only works when using the downloaded (not URL) version of TNHScoreLog**
+An extended version of [TNHScoreLog](#tnh-score-log) that records and displays a detailed score breakdown upon run completion.\
+Also includes an audio cue that plays when the breach countdown begins.
 
-An extension to [TNHScoreLog](#tnh-score-log) that records and displays a detailed score breakdown upon run completion.\
-Also includes audio cues that play when score bonuses are lost.\
-**To Install:** follow the instructions on the overlay [homepage](https://github.com/quilavad/TNHScoreBreakdown).
+> <img height="300" src="https://github.com/user-attachments/assets/7e0bc499-7a97-4294-b048-1ce1e54f4cef" alt="Preview Image"/>
 
+**Direct URL: [quilavad.github.io/scoreBreakdown](https://quilavad.github.io/scoreBreakdown.html)**\
 Download: [DownGit](https://downgit.github.io/#/home?url=https://github.com/quilavad/TNHScoreBreakdown/tree/main)
 
 ## Usage
@@ -60,7 +60,7 @@ Download: [DownGit](https://downgit.github.io/#/home?url=https://github.com/quil
 1. Create a new Browser Source.
 2. Add the overlay URL to the source.
    - If downloading, check `Local file` and select `index.html`.
-3. Set the Width and Height. A **minimum** of 400x250 is recommended.
+3. Set the Width and Height. For [TNHScoreLog](#tnh-score-log), a **minimum** of 400x250 is recommended.
 4. To restart the connection, enable `Refresh browser when scene becomes active`, then hide/show the source.
 
 ## Configuring
