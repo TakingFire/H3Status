@@ -10,7 +10,7 @@ function connect() {
   return ws;
 }
 
-const pointsPerSecond = 10 * 10;
+const pointsPerSecond = 12 * 10;
 let scoreMultiplier = 10;
 let encryptionType;
 let encryptionCount;

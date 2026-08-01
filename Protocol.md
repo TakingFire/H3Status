@@ -239,11 +239,7 @@ Type | Status | Description
   "KillBonus",                 // An enemy died during a Hold
   "HeadShotBonus",             // An enemy died from a hit to the head
   "MeleeKillBonus",            // An enemy died from a melee weapon
-  "JointBreakBonus",           // An enemy died from joint twisting
-  "JointSeverBonus",           // An enemy died from joint pulling
-  "KillStreakBonus",           // Two enemies died within one second
   "TakePhaseHealthBonus",      // Decreases with damage taken during Hold
-  "TakeGuardClearSpeedBonus",  // Hold guards were cleared quickly
 ]
 ```
 

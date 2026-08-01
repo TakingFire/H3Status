@@ -168,21 +168,39 @@ namespace H3Status.Patches
         private static TNHTokenStatus tokenStatus = new();
 
         private static readonly int[] eventMultiplier = [
-            10000, // HoldPhaseComplete
-            10,    // HoldDecisecondsRemaining
+            12000, // HoldPhaseComplete
+            12,    // HoldDecisecondsRemaining
             1,
-            10,   // HoldPhaseHealthBonus
-            100,  // KillBonus
-            200,  // HeadShotBonus
+            12,   // HoldPhaseHealthBonus
+            300,  // KillBonus
+            100,  // HeadShotBonus
             100,  // MeleeKillBonus
             100,  // JointBreakBonus
             100,  // JointSeverBonus
             1,
             250,  // KillStreakBonus
-            10,   // TakePhaseHealthBonus
+            12,   // TakePhaseHealthBonus
             1,
             1,
             250   // TakeGuardClearSpeedBonus
+        ];
+
+        private static readonly bool[] eventIsCounted = [
+            true,  // HoldPhaseComplete
+            true,  // HoldDecisecondsRemaining
+            false,
+            true,  // HoldPhaseHealthBonus
+            true,  // KillBonus
+            true,  // HeadShotBonus
+            true,  // MeleeKillBonus
+            false, // JointBreakBonus
+            false, // JointSeverBonus
+            false,
+            false, // KillStreakBonus
+            true,  // TakePhaseHealthBonus
+            false,
+            false,
+            false  // TakeGuardClearSpeedBonus
         ];
 
         private static int GetEventScore(TNH_Manager.ScoringEvent ev, int num)
@@ -197,6 +215,7 @@ namespace H3Status.Patches
 
             for (int i = 0; i <= 14; i++)
             {
+                if (!eventIsCounted[i]) { continue; }
                 score += GetEventScore((TNH_Manager.ScoringEvent)i, GM.TNH_Manager.Nums[i]);
             }
 
@@ -235,6 +254,8 @@ namespace H3Status.Patches
         [HarmonyPatch(typeof(TNH_Manager), nameof(TNH_Manager.IncrementScoringStat))]
         private static void TNHScoreEvent(TNH_Manager.ScoringEvent ev, int num, TNH_Manager __instance)
         {
+            if (!eventIsCounted[(int)ev]) { return; }
+
             if (Config.LogScoreEvents.Value)
             {
                 Plugin.Logger.LogMessage($"{ev}: {GetEventScore(ev, num) * GetMultiplier()} ({GetEventScore(ev, num)}x{GetMultiplier()})");
