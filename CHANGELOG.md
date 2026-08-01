@@ -1,3 +1,6 @@
+### H3Status 0.5.1
+* Updated scoring values and events to reflect [Update 120 Patch 2](https://store.steampowered.com/news/app/450540/view/699897618302502599).
+
 ### H3Status 0.5.0
 > **Supports H3VR 1.0 / Update 120!**
 + Added a configuration file (`BepInEx/config`)

@@ -10,7 +10,7 @@ namespace H3Status
     {
         public const string Guid = "xyz.bacur.plugins.h3status";
         public const string Name = "H3Status";
-        public const string Version = "0.5.0";
+        public const string Version = "0.5.1";
 
         internal static new ManualLogSource Logger;
         internal static Harmony Patcher;
