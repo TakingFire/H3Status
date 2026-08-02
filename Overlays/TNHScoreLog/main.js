@@ -327,7 +327,7 @@ function getEventString(event) {
     case "HoldPhaseComplete":
       return "HOLD COMPLETED";
     case "HoldDecisecondsRemaining":
-      return `TIME BONUS (${120 - Math.floor(event.value / 10 / 10)}s)`;
+      return `TIME BONUS (${120 - Math.floor(event.value / 10 / 12)}s)`;
     case "KillBonus":
       return "KILL";
     case "HeadShotBonus":
@@ -342,7 +342,7 @@ function getEventString(event) {
       return "MULTIKILL";
     case "HoldPhaseHealthBonus":
     case "TakePhaseHealthBonus":
-      return `HEALTH BONUS (${Math.round(event.value / 10)}%)`;
+      return `HEALTH BONUS (${Math.round(event.value / 12)}%)`;
     case "TakeGuardClearSpeedBonus":
       return `GUARDS WIPED (${20 - Math.round(event.value / 250)}s)`;
     default:
