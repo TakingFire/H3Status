@@ -124,24 +124,29 @@ function handleSceneEvent(event) {
 let currentPhaseIndex = 0;
 function handlePhaseEvent(event) {
   if (!globalConfig.showLevelBar) return;
-  levelBar.setLength(event.count);
 
   switch (event.phase) {
     case "Take": {
       phaseBar.reset();
       currentPhaseIndex = event.level * 2;
-      levelBar.setColor(currentPhaseIndex, "#0ff");
+
       if (event.level > 0) {
         for (let i = 0; i <= currentPhaseIndex - 1; i++) {
           levelBar.setColor(i, "#0f4");
         }
       } else {
+        levelBar.setLength(event.count);
+        levelBar.reset();
+
         eventLog.addItem(
           `SEED: ${event.seed} - HOLDS: ${event.count > 99 ? "ENDLESS" : event.count}`,
           "#8cf",
           10,
         );
       }
+
+      levelBar.setColor(currentPhaseIndex, "#0ff");
+
       if (event.holdName) {
         eventLog.addItem(`NEXT TARGET: ${event.holdName}`, "#8cf", 10);
         // eventLog.addItem(`RESUPPLY AT: ${event.supplyNames[0]}`, "#8cf", 10);
@@ -524,10 +529,7 @@ class ArrowBar {
     length = Math.min(length, 10);
     const elementLength = length * $template.childElementCount;
 
-    if (elementLength == this.length) {
-      this.reset();
-      return;
-    }
+    if (elementLength == this.length) return;
 
     this.element.replaceChildren();
 
