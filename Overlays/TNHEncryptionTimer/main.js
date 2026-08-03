@@ -10,6 +10,7 @@ function connect() {
   return ws;
 }
 
+const totalSeconds = 120;
 const pointsPerSecond = 12 * 10;
 let scoreMultiplier = 10;
 let encryptionType;
@@ -154,7 +155,7 @@ function hideOverlay() {
 class Countdown {
   constructor() {
     this.interval = null;
-    this.duration = 120;
+    this.duration = totalSeconds;
     this.value = this.duration;
   }
 
@@ -165,7 +166,7 @@ class Countdown {
     const progress = this.value / this.duration;
     const clock = this.duration - this.value;
     const score = this.value * pointsPerSecond * scoreMultiplier;
-    const scoreLost = 12000 * scoreMultiplier - score;
+    const scoreLost = totalSeconds * pointsPerSecond * scoreMultiplier - score;
 
     if (this.value <= 60) timerBar.setColor("#f44");
     timerBar.setValue((progress % 0.5) * 2);
