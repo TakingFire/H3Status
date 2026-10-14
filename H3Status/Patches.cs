@@ -136,6 +136,7 @@ namespace H3Status.Patches
         }
 
         [HarmonyPostfix]
+        [HarmonyPatch(typeof(TNH_HoldPoint), nameof(TNH_HoldPoint.BeginPhase))]
         [HarmonyPatch(typeof(TNH_HoldPoint), nameof(TNH_HoldPoint.BeginAnalyzing))]
         [HarmonyPatch(typeof(TNH_HoldPoint), nameof(TNH_HoldPoint.IdentifyEncryption))]
         [HarmonyPatch(typeof(TNH_HoldPoint), nameof(TNH_HoldPoint.CompletePhase))]
